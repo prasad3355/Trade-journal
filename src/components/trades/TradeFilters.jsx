@@ -11,7 +11,7 @@ function TradeFilters({ trades, filters, onChange, onClear, sort, onSort }) {
     <select name="session" value={filters.session} onChange={update}><option value="">All sessions</option>{selectOptions(trades.map((t) => t.session))}</select>
     <select name="rules" value={filters.rules} onChange={update}><option value="">Rules</option><option value="yes">Followed</option><option value="no">Not followed</option></select>
     <label className="date-control">From<input name="from" type="date" value={filters.from} onChange={update} /></label><label className="date-control">To<input name="to" type="date" value={filters.to} onChange={update} /></label>
-    <button className="clear-filters" type="button" onClick={onClear}>Clear filters</button>
+    <button className="btn-secondary btn-sm" type="button" onClick={onClear}>Clear filters</button>
   </div><div className="filter-bottom"><span>Sort by</span><select value={sort} onChange={(event) => onSort(event.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highestPnl">Highest P&amp;L</option><option value="lowestPnl">Lowest P&amp;L</option><option value="highestRr">Highest RR</option><option value="lowestRr">Lowest RR</option></select></div></section>
 }
 export default TradeFilters

@@ -14,9 +14,9 @@ function AppShell({ children, page, onPageChange, onNewTrade, onExport, onImport
           {navigation.map(([label, icon]) => <button className={`nav-item ${page === label.toLowerCase() ? 'nav-item--active' : ''}`} key={label} type="button" onClick={() => onPageChange(label.toLowerCase())}><i>{icon}</i><span>{label}</span></button>)}
         </nav>
         <div className="sidebar-footer">
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-            <button onClick={onExport} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--text)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Export</button>
-            <button onClick={onImportClick} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--text)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '10px' }}>Import</button>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+            <button className="btn-secondary btn-sm" onClick={onExport} style={{ flex: 1 }}>Export</button>
+            <button className="btn-secondary btn-sm" onClick={onImportClick} style={{ flex: 1 }}>Import</button>
           </div>
           <div><span className="status-dot" /> Local journal <small>v1.0</small></div>
         </div>

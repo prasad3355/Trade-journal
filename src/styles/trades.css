@@ -37,7 +37,7 @@
 .journal-summary span {
     display: block;
     color: var(--muted);
-    font-size: 9px;
+    font-size: 13px;
     margin-bottom: 7px
 }
 
@@ -86,11 +86,15 @@
     height: 32px;
     border: 1px solid var(--line);
     border-radius: 7px;
-    padding: 0 8px;
-    background: #111521;
+    padding: 0 28px 0 10px;
+    background: #111521 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aeb5c5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center;
     color: #aeb5c5;
-    font-size: 10px;
-    outline: none
+    font-size: 13px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
 }
 
 .date-control {
@@ -105,14 +109,14 @@
     border: 0;
     background: transparent;
     color: #b8bece;
-    font: 9px 'DM Mono', monospace
+    font: 11px 'DM Mono', monospace
 }
 
 .clear-filters {
     border: 0;
     background: transparent;
     color: #b4b7ff;
-    font-size: 10px;
+    font-size: 12px;
     cursor: pointer
 }
 
@@ -122,7 +126,7 @@
     gap: 8px;
     padding-top: 13px;
     color: var(--faint);
-    font-size: 10px
+    font-size: 12px
 }
 
 .trade-explorer-heading {
@@ -135,7 +139,7 @@
 .trade-explorer-heading p {
     margin: 0;
     color: var(--muted);
-    font-size: 11px
+    font-size: 13px
 }
 
 .trade-explorer-heading b {
@@ -155,7 +159,7 @@
     border-radius: 5px;
     background: transparent;
     color: var(--muted);
-    font-size: 10px;
+    font-size: 12px;
     cursor: pointer
 }
 
@@ -186,7 +190,7 @@
     padding: 11px 14px;
     color: var(--faint);
     background: rgba(255, 255, 255, .025);
-    font: 9px 'DM Mono', monospace
+    font: 11px 'DM Mono', monospace
 }
 
 .trade-list__row {
@@ -212,12 +216,12 @@
 
 .trade-list__row b,
 .trade-list__row strong {
-    font: 500 10px 'DM Mono', monospace
+    font: 500 12px 'DM Mono', monospace
 }
 
 .trade-list__row small {
     color: var(--faint);
-    font: 9px 'DM Mono', monospace
+    font: 11px 'DM Mono', monospace
 }
 
 .trade-list__row>span:nth-child(2) {
@@ -227,14 +231,14 @@
 }
 
 .trade-list__row>span:nth-child(2)>strong {
-    font-size: 11px
+    font-size: 13px
 }
 
 .result-badge {
     width: max-content;
     border-radius: 5px;
     padding: 4px 5px;
-    font: 8px 'DM Mono', monospace
+    font: 12px 'DM Mono', monospace
 }
 
 .result-badge--win {
@@ -274,7 +278,7 @@
 .empty-state p {
     margin: 0;
     color: var(--muted);
-    font-size: 11px
+    font-size: 13px
 }
 
 .trade-navigation {
@@ -290,7 +294,7 @@
     border: 0;
     background: transparent;
     color: #b7baff;
-    font-size: 10px;
+    font-size: 12px;
     cursor: pointer
 }
 
@@ -301,7 +305,7 @@
 
 .trade-navigation span {
     color: var(--faint);
-    font: 9px 'DM Mono', monospace
+    font: 11px 'DM Mono', monospace
 }
 
 .image-viewer__tools {
@@ -390,7 +394,7 @@
 
 .group-week__header h3 {
     margin: 0;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
     font-family: 'DM Mono', monospace;
     font-weight: 500;
@@ -402,7 +406,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    font-size: 11px;
+    font-size: 13px;
     font-family: 'DM Mono', monospace;
     color: var(--faint);
 }

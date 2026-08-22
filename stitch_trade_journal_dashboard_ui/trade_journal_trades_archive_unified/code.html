@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trade Journal - Trades</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#0c1324",
+                        "on-tertiary": "#67001b",
+                        "on-primary": "#002e6a",
+                        "surface-container-low": "#151b2d",
+                        "primary": "#adc6ff",
+                        "tertiary-fixed": "#ffdadb",
+                        "outline": "#8c909f",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#5b0017",
+                        "on-tertiary-fixed": "#40000d",
+                        "inverse-primary": "#005ac2",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "tertiary-container": "#ff516a",
+                        "surface-tint": "#adc6ff",
+                        "secondary-container": "#00a572",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-secondary-container": "#00311f",
+                        "surface-panel": "#0f172a",
+                        "surface-canvas": "#020617",
+                        "surface-dim": "#0c1324",
+                        "inverse-surface": "#dce1fb",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-variant": "#2e3447",
+                        "on-secondary": "#003824",
+                        "inverse-on-surface": "#2a3043",
+                        "on-primary-fixed": "#001a42",
+                        "on-surface": "#dce1fb",
+                        "surface-container-high": "#23293c",
+                        "on-secondary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#00285d",
+                        "tertiary": "#ffb2b7",
+                        "on-background": "#dce1fb",
+                        "secondary": "#4edea3",
+                        "surface-container-lowest": "#070d1f",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#424754",
+                        "surface-container": "#191f31",
+                        "surface-container-highest": "#2e3447",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "surface-bright": "#33394c",
+                        "primary-container": "#4d8eff",
+                        "surface": "#0c1324",
+                        "border-slate": "#1e293b",
+                        "secondary-fixed-dim": "#4edea3",
+                        "text-high-contrast": "#f8fafc",
+                        "primary-fixed": "#d8e2ff",
+                        "text-muted": "#94a3b8",
+                        "on-surface-variant": "#c2c6d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "col-gap": "12px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "margin-desktop": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "data-mono-md": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "data-mono-lg": ["JetBrains Mono"],
+                        "data-mono-sm": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-mono-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "700" }],
+                        "data-mono-lg": ["16px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "data-mono-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2e3447; 
+        }
+        
+        .win-bg { background-color: rgba(78, 222, 163, 0.1); }
+        .win-text { color: #4edea3; }
+        .loss-bg { background-color: rgba(255, 180, 171, 0.1); }
+        .loss-text { color: #ffb4ab; }
+        .be-bg { background-color: rgba(148, 163, 184, 0.1); }
+        .be-text { color: #94a3b8; }
+    </style>
+</head>
+<body class="bg-surface-canvas text-on-surface font-body-md h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="bg-surface-panel dark:bg-surface-panel font-body-md text-body-md data-mono: font-data-mono-md text-data-mono-md w-64 border-r border-border-slate flex-col flex-shrink-0 z-20 hidden md:flex h-full">
+<div class="px-gutter mb-8 pt-margin-desktop">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">TRADE JOURNAL</h1>
+<p class="font-label-caps text-label-caps text-text-muted mt-1 uppercase">Institutional Grade</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-text-muted font-normal hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-text-high-contrast font-bold border-l-2 border-primary bg-surface-container-high hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="show_chart">show_chart</span>
+<span>Trades</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-text-muted font-normal hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-text-muted font-normal hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span>Review</span>
+</a>
+</nav>
+<div class="mt-auto px-2 pb-margin-desktop">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-text-muted font-normal hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 ease-in-out mb-2" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<div class="px-3 py-2 border-t border-border-slate mt-2 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-data-mono-sm text-data-mono-sm text-text-muted">Status</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast truncate">Connected: NY4</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full min-w-0">
+<!-- TopAppBar -->
+<header class="bg-surface-canvas dark:bg-surface-canvas font-body-md text-body-md border-b border-border-slate w-full h-16 flex justify-between items-center px-margin-desktop z-20 flex-shrink-0">
+<div class="flex items-center gap-4 flex-1">
+<div class="md:hidden flex items-center">
+<span class="material-symbols-outlined text-text-high-contrast text-2xl cursor-pointer" data-icon="menu">menu</span>
+</div>
+<span class="font-data-mono-md text-data-mono-md text-text-muted hidden lg:block mr-4">Command Center</span>
+<div class="relative hidden sm:block w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" data-icon="search">search</span>
+<input class="w-full bg-surface-panel border border-border-slate text-text-high-contrast rounded py-1.5 pl-10 pr-3 focus:outline-none focus:border-primary font-data-mono-sm" placeholder="Search trades, pairs, dates..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 flex-shrink-0">
+<button class="text-text-muted hover:text-text-high-contrast transition-colors duration-150 ease-linear">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-text-muted hover:text-text-high-contrast transition-colors duration-150 ease-linear">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+<button class="bg-inverse-primary text-text-high-contrast px-4 py-2 rounded font-data-mono-sm hover:bg-primary-container transition-colors hidden sm:block whitespace-nowrap">
+                    + Add Trade
+                </button>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop pb-12 w-full max-w-[1440px] mx-auto min-w-0">
+<!-- Hero Section -->
+<section class="py-8 border-b border-border-slate">
+<h1 class="font-headline-lg text-headline-lg text-text-high-contrast mb-2">Trade Archive</h1>
+<p class="font-body-lg text-body-lg text-text-muted mb-8">Every execution. Every decision. Every lesson.</p>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Total Trades</span>
+<span class="font-data-mono-lg text-data-mono-lg text-text-high-contrast">182</span>
+</div>
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Win Rate</span>
+<span class="font-data-mono-lg text-data-mono-lg text-text-high-contrast">68.2%</span>
+</div>
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Net P&amp;L</span>
+<span class="font-data-mono-lg text-data-mono-lg win-text">+$42,850</span>
+</div>
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Avg R</span>
+<span class="font-data-mono-lg text-data-mono-lg text-text-high-contrast">1.8R</span>
+</div>
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Best Trade</span>
+<span class="font-data-mono-lg text-data-mono-lg win-text">+$3,450</span>
+</div>
+<div class="bg-surface-panel border border-border-slate p-4 rounded flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase mb-1">Worst Trade</span>
+<span class="font-data-mono-lg text-data-mono-lg loss-text">-$850</span>
+</div>
+</div>
+</section>
+<!-- Filters Bar -->
+<section class="py-4 border-b border-border-slate flex flex-col lg:flex-row justify-between gap-4 sticky top-0 bg-surface-canvas z-10">
+<div class="flex flex-wrap gap-2 items-center">
+<button class="bg-surface-container-high border border-border-slate text-text-high-contrast font-data-mono-sm px-3 py-1.5 rounded flex items-center gap-2 hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>
+                        Instrument
+                    </button>
+<button class="bg-surface-panel border border-border-slate text-text-muted font-data-mono-sm px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">Setup</button>
+<button class="bg-surface-panel border border-border-slate text-text-muted font-data-mono-sm px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">Session</button>
+<button class="bg-surface-panel border border-border-slate text-text-muted font-data-mono-sm px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">Timeframe</button>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-panel border border-border-slate rounded p-0.5">
+<button class="bg-surface-container-high text-text-high-contrast font-data-mono-sm px-3 py-1 rounded shadow-sm">All</button>
+<button class="text-text-muted font-data-mono-sm px-3 py-1 rounded hover:text-text-high-contrast">Wins</button>
+<button class="text-text-muted font-data-mono-sm px-3 py-1 rounded hover:text-text-high-contrast">Losses</button>
+</div>
+<div class="flex items-center gap-2 text-text-muted font-data-mono-sm">
+<span>Sort:</span>
+<select class="bg-transparent border-none text-text-high-contrast focus:ring-0 p-0 cursor-pointer text-sm">
+<option class="bg-surface-panel" value="newest">Newest</option>
+<option class="bg-surface-panel" value="pnl_desc">Highest P&amp;L</option>
+<option class="bg-surface-panel" value="rr_desc">Best R:R</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Time Group: JULY 2024 -->
+<section class="mt-8">
+<div class="flex items-center justify-between mb-4 border-b border-border-slate pb-2 cursor-pointer group">
+<h2 class="font-headline-sm text-headline-sm text-text-high-contrast flex items-center gap-2">
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary transition-colors" data-icon="expand_more">expand_more</span>
+                        JULY 2024
+                    </h2>
+<div class="flex gap-4 font-data-mono-md text-data-mono-md">
+<span class="text-text-muted hidden sm:inline">Trades: 42</span>
+<span class="text-text-muted hidden sm:inline">WR: 71%</span>
+<span class="win-text">+$12,400</span>
+</div>
+</div>
+<!-- Sub-group: Week 4 -->
+<div class="mb-6 pl-2 sm:pl-6 sm:border-l border-border-slate">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-body-md text-body-md text-text-muted font-medium">Week 4 — Jul 22-28</h3>
+<div class="font-data-mono-sm text-data-mono-sm text-text-muted">
+<span class="hidden sm:inline">12 Trades | </span><span class="win-text">+$3,250</span>
+</div>
+</div>
+<!-- Grid of Trade Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-panel border border-border-slate rounded overflow-hidden hover:border-outline transition-colors cursor-pointer group">
+<div class="h-48 w-full border-b border-border-slate relative bg-surface-canvas bg-cover bg-center" data-alt="A large, professional 16:9 trading chart screenshot showing a complex price action setup on a dark theme terminal. Candlesticks in blue and white, with analytical drawing tools, volume profile, and fibonacci levels visible. The interface is clean, dark obsidian background, highly technical and data dense. Modern fintech UI aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmkMmwthuXV6Kj0TWwdJ2GsDo8cj4SkAe5mksfSbm7vn8pErMeYvMJCmm9tqfAAzJdOm68Za-Ejrn8F3CQj42JK0TYe9icYPa3RG8hJOJDXHVmmBqp5fAYzSIbYDGJj8hJLKwhhq2WeDqwRGKCHFK_afCuh_QED7L9KWXoT_dA5JMxATDIvHwwGTmQzNOxmKrrzQEQZmwOYm4zMop7p-ugFskpXOUIXytU-ZJkgrSwlPvMQdMaGEMO')">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-panel/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="bg-surface-container-high border border-border-slate text-text-high-contrast px-4 py-2 rounded font-data-mono-sm">View Full Screen</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-data-mono-md text-data-mono-md text-text-high-contrast font-bold">NQ1!</span>
+<span class="font-label-caps text-label-caps text-inverse-primary border border-inverse-primary/30 bg-inverse-primary/10 px-1.5 py-0.5 rounded">LONG</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted">Jul 25, 09:35 EST</span>
+</div>
+<div class="text-right">
+<div class="font-data-mono-md text-data-mono-md win-text font-bold mb-1">+$1,250</div>
+<span class="font-label-caps text-label-caps win-text win-bg px-2 py-1 rounded">WIN</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-border-slate">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Setup</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast truncate">Liq Sweep</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Session</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">NY AM</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">R:R</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">1:2.4</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Timeframe</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">5m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-panel border border-border-slate rounded overflow-hidden hover:border-outline transition-colors cursor-pointer group">
+<div class="h-48 w-full border-b border-border-slate relative bg-surface-canvas bg-cover bg-center" data-alt="A 16:9 trading chart screenshot of a forex pair on a dark mode terminal. Red and green modern candlesticks with moving averages and a MACD indicator below. Professional, high-density data layout typical of institutional trading platforms. Minimalist obsidian aesthetic with stark contrasts." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBVxQU9GNTQk2lujLybOXEBat-w0pJAIr0gy96MNmQsS-ywF0kCMwObWH0mPOsCKW1Oi26XVFfdb69WGFPjfIysPyTee0YReIKtJf8hdf2HtrLgA0emyus25dDwPvBzulliB2exw8uS352LMx0wQsn9mn2pWWPx6OXJ_dqEiPmp4ZxC8tPcpauoKkpa56haPO3c__NWW1HZ6ixe3sfBo0ja4gR3OHrXoHvyZq5xX5xHgzQrZzIkJ8XG')">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-panel/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="bg-surface-container-high border border-border-slate text-text-high-contrast px-4 py-2 rounded font-data-mono-sm">View Full Screen</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-data-mono-md text-data-mono-md text-text-high-contrast font-bold">XAUUSD</span>
+<span class="font-label-caps text-label-caps text-on-error border border-error/30 bg-error/10 px-1.5 py-0.5 rounded">SHORT</span>
+</div>
+<span class="font-body-sm text-body-sm text-text-muted">Jul 24, 03:15 EST</span>
+</div>
+<div class="text-right">
+<div class="font-data-mono-md text-data-mono-md loss-text font-bold mb-1">-$450</div>
+<span class="font-label-caps text-label-caps loss-text loss-bg px-2 py-1 rounded">LOSS</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-border-slate">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Setup</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast truncate">FVG Entry</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Session</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">LDN</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">R:R</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">1:-1</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-muted uppercase">Timeframe</span>
+<span class="font-data-mono-sm text-data-mono-sm text-text-high-contrast">15m</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

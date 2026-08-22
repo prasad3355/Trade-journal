@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analytics - Trade Journal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "active-cyan": "#00E5FF",
+                      "inverse-on-surface": "#2a3233",
+                      "on-secondary-container": "#00311f",
+                      "on-error-container": "#ffdad6",
+                      "inverse-surface": "#dce4e5",
+                      "surface-container-low": "#151d1e",
+                      "profit": "#10B981",
+                      "surface-2": "#151A21",
+                      "inverse-primary": "#006875",
+                      "outline": "#849396",
+                      "on-tertiary-container": "#6f5500",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-tertiary": "#3e2e00",
+                      "tertiary": "#ffeac0",
+                      "on-secondary-fixed": "#002113",
+                      "surface": "#0d1516",
+                      "surface-3": "#1A2028",
+                      "on-surface-variant": "#bac9cc",
+                      "primary-fixed-dim": "#00daf3",
+                      "tertiary-fixed-dim": "#f3bf26",
+                      "on-primary": "#00363d",
+                      "tertiary-fixed": "#ffdf96",
+                      "warning-amber": "#F59E0B",
+                      "on-primary-container": "#00626e",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-container-highest": "#2e3638",
+                      "surface-1": "#11151B",
+                      "outline-variant": "#3b494c",
+                      "surface-container": "#192122",
+                      "primary-fixed": "#9cf0ff",
+                      "secondary-container": "#00a572",
+                      "surface-container-high": "#242b2d",
+                      "on-error": "#690005",
+                      "primary": "#c3f5ff",
+                      "surface-container-lowest": "#080f11",
+                      "on-primary-fixed-variant": "#004f58",
+                      "surface-variant": "#2e3638",
+                      "tertiary-container": "#fec931",
+                      "error-container": "#93000a",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed": "#251a00",
+                      "background": "#080A0D",
+                      "analytics-violet": "#8B5CF6",
+                      "on-secondary": "#003824",
+                      "surface-dim": "#0d1516",
+                      "surface-bright": "#333a3c",
+                      "on-background": "#dce4e5",
+                      "primary-container": "#00e5ff",
+                      "on-surface": "#dce4e5",
+                      "on-primary-fixed": "#001f24",
+                      "on-tertiary-fixed-variant": "#594400",
+                      "surface-tint": "#00daf3",
+                      "loss": "#F43F5E",
+                      "secondary-fixed": "#6ffbbe",
+                      "secondary": "#4edea3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "panel-padding": "8px",
+                      "component-gap": "4px",
+                      "margin-screen": "12px",
+                      "unit": "4px",
+                      "gutter": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "data-md": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "data-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "10px",
+                              {
+                                      "lineHeight": "12px",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080A0D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1A2028;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b494c;
+        }
+        
+        .hardware-grid {
+            background-image: 
+                linear-gradient(to right, #1A2028 1px, transparent 1px),
+                linear-gradient(to bottom, #1A2028 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden flex h-screen w-screen selection:bg-active-cyan selection:text-background">
+<!-- JSON Component: SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 border-r border-outline-variant border-r border-outline-variant bg-surface-1 flex flex-col h-full py-panel-padding z-50">
+<div class="px-4 mb-6 pt-2">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tighter">TRADE JOURNAL</h1>
+<div class="flex items-center gap-2 mt-1">
+<div class="w-2 h-2 rounded-full bg-profit animate-pulse"></div>
+<span class="font-data-sm text-data-sm text-on-surface-variant uppercase">SYSTEM ONLINE</span>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-caps text-label-caps">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">list_alt</span>
+<span class="font-label-caps text-label-caps">Trades</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 border-l-2 border-active-cyan bg-surface-container text-active-cyan hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-caps text-label-caps">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">rate_review</span>
+<span class="font-label-caps text-label-caps">Review</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</div>
+<div class="px-4 mt-auto">
+<button class="w-full bg-active-cyan text-background font-label-caps text-label-caps py-2 hover:bg-primary-fixed transition-colors">
+                + Add Trade
+            </button>
+</div>
+</nav>
+<!-- JSON Component: TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-12 border-b border-outline-variant border-b border-outline-variant bg-surface flex justify-between items-center px-margin-screen z-40">
+<div class="flex-1 flex items-center">
+<!-- Search bar implied on_left -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+<input class="w-full bg-surface-2 border border-outline-variant rounded-none py-1 pl-8 pr-2 font-data-sm text-data-sm text-on-surface focus:border-active-cyan focus:ring-0 focus:outline-none placeholder-on-surface-variant" placeholder="CMD / K" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all p-1">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all p-1">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all p-1">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<button class="bg-surface-2 border border-active-cyan text-active-cyan font-label-caps text-label-caps px-3 py-1 hover:bg-active-cyan hover:text-background transition-colors">
+                + Add Trade
+            </button>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="ml-64 mt-12 w-[calc(100%-16rem)] h-[calc(100vh-3rem)] overflow-y-auto hardware-grid p-unit flex flex-col gap-unit">
+<!-- HEADER & TICKER -->
+<section class="flex flex-col gap-unit">
+<!-- Analytics Header -->
+<div class="bg-surface-1 border border-outline-variant p-2 flex justify-between items-end">
+<div>
+<h2 class="font-headline-md text-headline-md font-semibold text-on-surface">ANALYTICS ENGINE</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Understand your edge, execution, risk, and behavior</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-profit"></div>
+<span class="font-data-sm text-data-sm text-on-surface-variant uppercase">DATA SYNCED</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-active-cyan"></div>
+<span class="font-data-sm text-data-sm text-on-surface-variant uppercase">33 TRADES</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-[1px] bg-outline-variant p-[1px]">
+<button class="bg-surface-2 px-2 py-0.5 font-data-sm text-data-sm text-on-surface-variant hover:text-on-surface">1D</button>
+<button class="bg-surface-2 px-2 py-0.5 font-data-sm text-data-sm text-on-surface-variant hover:text-on-surface">1W</button>
+<button class="bg-surface-2 px-2 py-0.5 font-data-sm text-data-sm text-on-surface-variant hover:text-on-surface">1M</button>
+<button class="bg-surface-2 px-2 py-0.5 font-data-sm text-data-sm text-on-surface-variant hover:text-on-surface">3M</button>
+<button class="bg-active-cyan px-2 py-0.5 font-data-sm text-data-sm text-background">YTD</button>
+<button class="bg-surface-2 px-2 py-0.5 font-data-sm text-data-sm text-on-surface-variant hover:text-on-surface">ALL</button>
+</div>
+<div class="flex gap-2">
+<button class="border border-outline-variant bg-surface-2 px-2 py-0.5 flex items-center gap-1 font-label-caps text-label-caps text-on-surface hover:border-active-cyan transition-colors">
+<span class="material-symbols-outlined text-[12px]">filter_list</span> FILTER
+                            </button>
+<button class="border border-outline-variant bg-surface-2 px-2 py-0.5 flex items-center gap-1 font-label-caps text-label-caps text-on-surface hover:border-active-cyan transition-colors">
+<span class="material-symbols-outlined text-[12px]">compare_arrows</span> COMPARE
+                            </button>
+<button class="border border-outline-variant bg-surface-2 px-2 py-0.5 flex items-center gap-1 font-label-caps text-label-caps text-on-surface hover:border-active-cyan transition-colors">
+<span class="material-symbols-outlined text-[12px]">download</span> EXPORT
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bloomberg Ticker -->
+<div class="bg-surface-3 border border-outline-variant py-1.5 px-4 overflow-hidden whitespace-nowrap flex items-center text-data-sm font-data-sm">
+<div class="flex gap-8 animate-[ticker_30s_linear_infinite] min-w-full">
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">NET P&amp;L</span><span class="text-profit">+$923.00</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">WIN RATE</span><span class="text-active-cyan">52.0%</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">PF</span><span class="text-profit">2.36</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">EXPECTANCY</span><span class="text-profit">+0.84R</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">AVG R</span><span class="text-profit">+1.18R</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">MAX DD</span><span class="text-loss">-4.2%</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">TRADES</span><span class="text-on-surface">33</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">LONG</span><span class="text-on-surface">16</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">SHORT</span><span class="text-on-surface">17</span></span>
+<!-- Duplicate for infinite scroll effect -->
+<span class="flex gap-2 ml-8"><span class="text-on-surface-variant uppercase">NET P&amp;L</span><span class="text-profit">+$923.00</span></span>
+<span class="flex gap-2"><span class="text-on-surface-variant uppercase">WIN RATE</span><span class="text-active-cyan">52.0%</span></span>
+</div>
+</div>
+</section>
+<!-- PRIMARY WORKSPACE (Asymmetric Grid) -->
+<section class="grid grid-cols-12 gap-unit min-h-[400px]">
+<!-- MAIN PANEL: Chart -->
+<div class="col-span-9 bg-surface-1 border border-outline-variant flex flex-col relative">
+<div class="border-b border-outline-variant p-2 flex justify-between items-center bg-surface-2">
+<div class="flex gap-4">
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase border-l-2 border-active-cyan pl-2">Performance Engine</h3>
+</div>
+<div class="flex gap-[1px] bg-outline-variant p-[1px]">
+<button class="bg-active-cyan px-2 py-0.5 font-label-caps text-label-caps text-background">EQUITY</button>
+<button class="bg-surface-3 px-2 py-0.5 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">P&amp;L</button>
+<button class="bg-surface-3 px-2 py-0.5 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">CUMULATIVE R</button>
+<button class="bg-surface-3 px-2 py-0.5 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">DRAWDOWN</button>
+</div>
+</div>
+<div class="flex-1 relative p-4 group">
+<!-- Placeholder for Chart -->
+<div class="absolute inset-4 border border-outline-variant border-dashed opacity-20 flex items-center justify-center">
+<span class="font-data-sm text-data-sm text-on-surface-variant">[CHART RENDER CANVAS]</span>
+</div>
+<!-- Simulated Chart Elements -->
+<svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" preserveaspectratio="none">
+<path class="opacity-80" d="M 0,200 L 50,180 L 100,210 L 150,150 L 200,160 L 250,90 L 300,120 L 350,50 L 400,60 L 500,20 L 600,40" fill="none" stroke="#00E5FF" stroke-width="2"></path>
+<!-- Win/Loss Markers -->
+<circle cx="50" cy="180" fill="#10B981" r="3"></circle>
+<circle cx="100" cy="210" fill="#F43F5E" r="3"></circle>
+<circle cx="250" cy="90" fill="#10B981" r="3"></circle>
+<circle cx="350" cy="50" fill="#10B981" r="3"></circle>
+<circle cx="500" cy="20" fill="#10B981" r="3"></circle>
+</svg>
+<!-- Floating Controls -->
+<div class="absolute top-6 right-6 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-surface-3 border border-outline-variant p-1 hover:border-active-cyan text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+<button class="bg-surface-3 border border-outline-variant p-1 hover:border-active-cyan text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<button class="bg-surface-3 border border-outline-variant p-1 hover:border-active-cyan text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[16px]">fit_screen</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT SIDEBAR: Live Status Stack -->
+<div class="col-span-3 flex flex-col gap-unit">
+<div class="bg-surface-1 border border-outline-variant p-2 flex-1">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2 border-b border-outline-variant pb-1">Live Status</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-baseline">
+<span class="font-data-sm text-data-sm text-on-surface-variant">Current Equity</span>
+<span class="font-data-lg text-data-lg text-active-cyan">$10,923.00</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-data-sm text-data-sm text-on-surface-variant">Current DD</span>
+<span class="font-data-md text-data-md text-warning-amber">-1.2%</span>
+</div>
+<div>
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-data-sm text-data-sm text-on-surface-variant">Recovery</span>
+<span class="font-data-sm text-data-sm text-on-surface">87%</span>
+</div>
+<div class="w-full h-1 bg-surface-3">
+<div class="h-full bg-active-cyan" style="width: 87%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-1 border border-outline-variant p-2 flex-1">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2 border-b border-outline-variant pb-1">Edge Signal</h3>
+<div class="space-y-2">
+<div class="bg-surface-2 p-1.5 border-l-2 border-active-cyan">
+<span class="font-data-sm text-data-sm text-on-surface-variant block mb-0.5">Best Setup</span>
+<span class="font-data-md text-data-md text-on-surface uppercase">Liquidity Sweep</span>
+</div>
+<div class="bg-surface-2 p-1.5 border-l-2 border-analytics-violet">
+<span class="font-data-sm text-data-sm text-on-surface-variant block mb-0.5">Best Session</span>
+<span class="font-data-md text-data-md text-on-surface uppercase">New York</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-1 border border-outline-variant p-2">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2 border-b border-outline-variant pb-1">Risk Status</h3>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-surface-3 flex items-center justify-center relative">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle cx="50%" cy="50%" fill="none" r="45%" stroke="#10B981" stroke-dasharray="100" stroke-dashoffset="16" stroke-width="2"></circle>
+</svg>
+<span class="font-data-sm text-data-sm text-profit">84%</span>
+</div>
+<div class="flex-1">
+<span class="font-label-caps text-label-caps text-on-surface block">Consistency</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant">NOMINAL</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- BOTTOM TABLE: Recent Executions -->
+<section class="bg-surface-1 border border-outline-variant flex flex-col flex-1 min-h-[300px]">
+<div class="border-b border-outline-variant p-2 flex justify-between items-center bg-surface-2">
+<h3 class="font-label-caps text-label-caps text-on-surface uppercase border-l-2 border-active-cyan pl-2">Recent Executions</h3>
+<button class="font-label-caps text-label-caps text-active-cyan hover:underline">VIEW ALL TERMINAL &gt;</button>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-surface-1 z-10 border-b border-outline-variant font-label-caps text-label-caps text-on-surface-variant">
+<tr>
+<th class="p-2 font-normal">TIME</th>
+<th class="p-2 font-normal">INSTRUMENT</th>
+<th class="p-2 font-normal">SETUP</th>
+<th class="p-2 font-normal">SESSION</th>
+<th class="p-2 font-normal text-right">R</th>
+<th class="p-2 font-normal text-right">P&amp;L</th>
+<th class="p-2 font-normal text-center">QUALITY</th>
+</tr>
+</thead>
+<tbody class="font-data-sm text-data-sm">
+<tr class="border-b border-surface-3 hover:bg-surface-2 transition-colors">
+<td class="p-2 text-on-surface-variant">10:45:22</td>
+<td class="p-2"><span class="bg-surface-3 px-1 py-0.5 border border-outline-variant rounded-sm">NQ1!</span></td>
+<td class="p-2 text-on-surface">Liq Sweep</td>
+<td class="p-2 text-analytics-violet">NY</td>
+<td class="p-2 text-right text-profit">+2.1R</td>
+<td class="p-2 text-right text-profit">+$420.00</td>
+<td class="p-2 text-center">
+<div class="w-full bg-surface-3 h-1.5 flex gap-[1px]">
+<div class="flex-1 bg-profit"></div><div class="flex-1 bg-profit"></div><div class="flex-1 bg-profit"></div>
+</div>
+</td>
+</tr>
+<tr class="border-b border-surface-3 hover:bg-surface-2 transition-colors">
+<td class="p-2 text-on-surface-variant">08:15:00</td>
+<td class="p-2"><span class="bg-surface-3 px-1 py-0.5 border border-outline-variant rounded-sm">ES1!</span></td>
+<td class="p-2 text-on-surface">Breakout</td>
+<td class="p-2 text-analytics-violet">NY</td>
+<td class="p-2 text-right text-loss">-1.0R</td>
+<td class="p-2 text-right text-loss">-$200.00</td>
+<td class="p-2 text-center">
+<div class="w-full bg-surface-3 h-1.5 flex gap-[1px]">
+<div class="flex-1 bg-profit"></div><div class="flex-1 bg-loss"></div><div class="flex-1 bg-surface-3"></div>
+</div>
+</td>
+</tr>
+<!-- More rows would go here in a real app, keeping dense for now to satisfy requirements without excessive length -->
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<style>
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+</body></html>
