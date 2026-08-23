@@ -3,6 +3,7 @@ import AppShell from "./components/layout/AppShell";
 import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
 import Analytics from "./pages/Analytics";
+import Performance from "./pages/Performance";
 import Review from "./pages/Review";
 import Discipline from "./pages/Discipline";
 import Calendar from "./pages/Calendar";
@@ -123,6 +124,8 @@ function App() {
           />
         ) : page === "dataCenter" ? (
           <DataCenter trades={trades} />
+        ) : page === "performance" ? (
+          <Performance trades={trades} onSelectTrade={openTrade} />
         ) : page === "discipline" ? (
           <Discipline trades={trades} onSelectTrade={openTrade} />
         ) : page === "calendar" ? (
