@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
 import Analytics from "./pages/Analytics";
 import Review from "./pages/Review";
+import Discipline from "./pages/Discipline";
 import Calendar from "./pages/Calendar";
 import DataCenter from "./pages/DataCenter";
 import TradeDetail from "./components/TradeDetail";
@@ -122,6 +123,8 @@ function App() {
           />
         ) : page === "dataCenter" ? (
           <DataCenter trades={trades} />
+        ) : page === "discipline" ? (
+          <Discipline trades={trades} onSelectTrade={openTrade} />
         ) : page === "calendar" ? (
           <Calendar trades={trades} onSelectTrade={openTrade} />
         ) : (

@@ -3,6 +3,7 @@ const navigation = [
   ["Trades", "trades", "query_stats"],
   ["Calendar", "calendar", "calendar_month"],
   ["Analytics", "analytics", "analytics"],
+  ["Discipline", "discipline", "policy"],
   ["Review", "review", "rate_review"],
   ["Data Center", "dataCenter", "storage"],
 ];
