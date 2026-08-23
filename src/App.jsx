@@ -1,40 +1,53 @@
-import { useState, useEffect } from 'react'
-import AppShell from './components/layout/AppShell'
-import Dashboard from './pages/Dashboard'
-import Trades from './pages/Trades'
-import Analytics from './pages/Analytics'
-import TradeDetail from './components/TradeDetail'
-import { useTrades } from './context/TradeContext'
-import TradeEditor from './components/trades/TradeEditor'
-import { useRef } from 'react'
+import { useState, useEffect } from "react";
+import AppShell from "./components/layout/AppShell";
+import Dashboard from "./pages/Dashboard";
+import Trades from "./pages/Trades";
+import Analytics from "./pages/Analytics";
+import Review from "./pages/Review";
+import Calendar from "./pages/Calendar";
+import DataCenter from "./pages/DataCenter";
+import TradeDetail from "./components/TradeDetail";
+import { useTrades } from "./context/TradeContext";
+import TradeEditor from "./components/trades/TradeEditor";
+import { useRef } from "react";
 
 function App() {
-  const { trades, isLoading, importBackup } = useTrades()
-  const [selectedTrade, setSelectedTrade] = useState(null)
-  const [reviewTrades, setReviewTrades] = useState([])
-  const [page, setPage] = useState('overview')
-  const [tradeFilters, setTradeFilters] = useState(null)
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [tradeToEdit, setTradeToEdit] = useState(null)
-  const fileReaderRef = useRef(null)
+  const { trades, isLoading, importBackup } = useTrades();
+  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [reviewTrades, setReviewTrades] = useState([]);
+  const [page, setPage] = useState("dashboard");
+  const [tradeFilters, setTradeFilters] = useState(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [tradeToEdit, setTradeToEdit] = useState(null);
+  const fileReaderRef = useRef(null);
 
   useEffect(() => {
     if (!isLoading) setReviewTrades(trades);
-  }, [isLoading, trades])
+  }, [isLoading, trades]);
 
-  const openTrade = (trade, visibleTrades = trades) => { setReviewTrades(visibleTrades); setSelectedTrade(trade) }
+  const openTrade = (trade, visibleTrades = trades) => {
+    setReviewTrades(visibleTrades);
+    setSelectedTrade(trade);
+  };
 
   if (isLoading) {
-    return <div className="loading-state">Loading journal...</div>
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-surface-canvas text-text-muted font-label-caps uppercase tracking-widest gap-4">
+        <div className="w-8 h-8 rounded-full border-2 border-border-slate border-t-primary animate-spin"></div>
+        Loading journal...
+      </div>
+    );
   }
 
   const handleExport = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trades));
-    const dlAnchorElem = document.createElement('a');
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(trades));
+    const dlAnchorElem = document.createElement("a");
     dlAnchorElem.setAttribute("href", dataStr);
     dlAnchorElem.setAttribute("download", "tradefolio_backup.json");
     dlAnchorElem.click();
-  }
+  };
 
   const handleImport = (e) => {
     const file = e.target.files[0];
@@ -53,28 +66,106 @@ function App() {
       };
       reader.readAsText(file);
     }
-  }
+  };
 
   return (
-    <main className="app-shell">
-      <AppShell page={page} onPageChange={setPage} onNewTrade={() => { setTradeToEdit(null); setIsEditorOpen(true) }} onExport={handleExport} onImportClick={() => fileReaderRef.current?.click()} >
-        <input type="file" accept=".json" ref={fileReaderRef} onChange={handleImport} hidden />
-        {page === 'trades' ? <Trades trades={trades} onSelectTrade={openTrade} initialFilters={tradeFilters} /> : page === 'analytics' ? <Analytics trades={trades} onSelectTrade={openTrade} onFilterTrades={(filters) => { setTradeFilters(filters); setPage('trades') }} /> : <Dashboard trades={trades} onSelectTrade={openTrade} onViewTrades={() => setPage('trades')} />}
+    <main className="w-full h-screen bg-surface-canvas text-text-high-contrast selection:bg-primary selection:text-background relative overflow-hidden">
+      <AppShell
+        page={page}
+        onPageChange={setPage}
+        onNewTrade={() => {
+          setTradeToEdit(null);
+          setIsEditorOpen(true);
+        }}
+        onExport={handleExport}
+        onImportClick={() => fileReaderRef.current?.click()}
+      >
+        <input
+          type="file"
+          accept=".json"
+          ref={fileReaderRef}
+          onChange={handleImport}
+          hidden
+        />
+        {page === "trades" ? (
+          <Trades
+            trades={trades}
+            onSelectTrade={openTrade}
+            initialFilters={tradeFilters}
+            onEdit={(t) => {
+              setTradeToEdit(t);
+              setIsEditorOpen(true);
+            }}
+            onDuplicate={(t) => {
+              const cloned = { ...t, id: `trade-${Date.now()}`, date: new Date().toISOString().slice(0, 16) };
+              setTradeToEdit(cloned);
+              setIsEditorOpen(true);
+            }}
+          />
+        ) : page === "analytics" ? (
+          <Analytics
+            trades={trades}
+            onSelectTrade={openTrade}
+            onFilterTrades={(filters) => {
+              setTradeFilters(filters);
+              setPage("trades");
+            }}
+          />
+        ) : page === "review" ? (
+          <Review
+            trades={trades}
+            onSelectTrade={openTrade}
+            onEdit={(t) => {
+              setTradeToEdit(t);
+              setIsEditorOpen(true);
+            }}
+          />
+        ) : page === "dataCenter" ? (
+          <DataCenter trades={trades} />
+        ) : page === "calendar" ? (
+          <Calendar trades={trades} onSelectTrade={openTrade} />
+        ) : (
+          <Dashboard
+            trades={trades}
+            onSelectTrade={openTrade}
+            onViewTrades={() => setPage("trades")}
+          />
+        )}
       </AppShell>
       {selectedTrade && (
-        <TradeDetail trade={selectedTrade} trades={reviewTrades} onClose={() => setSelectedTrade(null)} onSelectTrade={setSelectedTrade}
-          onEdit={() => { setTradeToEdit(selectedTrade); setSelectedTrade(null); setIsEditorOpen(true) }}
+        <TradeDetail
+          trade={selectedTrade}
+          trades={reviewTrades}
+          onClose={() => setSelectedTrade(null)}
+          onSelectTrade={setSelectedTrade}
+          onEdit={() => {
+            setTradeToEdit(selectedTrade);
+            setSelectedTrade(null);
+            setIsEditorOpen(true);
+          }}
           onDuplicate={() => {
-            const cloned = { ...selectedTrade, id: `trade-${Date.now()}`, date: new Date().toISOString().slice(0, 16) }
-            setTradeToEdit(cloned); setSelectedTrade(null); setIsEditorOpen(true);
+            const cloned = {
+              ...selectedTrade,
+              id: `trade-${Date.now()}`,
+              date: new Date().toISOString().slice(0, 16),
+            };
+            setTradeToEdit(cloned);
+            setSelectedTrade(null);
+            setIsEditorOpen(true);
           }}
         />
       )}
       {isEditorOpen && (
-        <TradeEditor initialData={tradeToEdit} onClose={() => { setIsEditorOpen(false); setTradeToEdit(null) }} />
+        <TradeEditor
+          initialData={tradeToEdit}
+          onClose={() => {
+            setIsEditorOpen(false);
+            setTradeToEdit(null);
+          }}
+        />
       )}
     </main>
-  )
+  );
 }
 
-export default App
+export default App;

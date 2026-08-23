@@ -1,1 +1,430 @@
-.analytics-page{max-width:1300px;margin:auto;padding:52px 44px 72px}.analytics-intro h1{margin:0;font-size:38px;letter-spacing:-.065em}.analytics-intro>p:last-child{margin:12px 0 29px;color:var(--muted);font-size:12px}.analytics-metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:15px}.analytics-metric{padding:15px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))}.analytics-metric span{display:block;color:var(--muted);font-size:9px;margin-bottom:9px}.analytics-metric strong{font:500 17px 'DM Mono',monospace;letter-spacing:-.07em}.analysis-panel{padding:20px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(20,24,37,.85),rgba(14,16,25,.7));box-shadow:var(--shadow)}.analysis-panel__heading{display:flex;justify-content:space-between;align-items:start}.analysis-panel__heading h2,.analysis-panel h2{margin:0;font-size:18px;letter-spacing:-.05em}.analysis-panel__heading>span{color:var(--faint);font:9px 'DM Mono',monospace}.equity-lab{margin-bottom:12px}.analytics-chart{height:240px;margin-top:17px}.analytics-chart svg{width:100%;height:100%;overflow:visible}.equity-point{cursor:pointer;stroke:#10131d;stroke-width:2;transition:r .2s}.equity-point:hover{r:8}.equity-point.gain{fill:var(--profit)}.equity-point.decline{fill:var(--loss)}.analytics-split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}.drawdown-panel strong{font:500 15px 'DM Mono',monospace}.drawdown-bars{height:100px;display:flex;gap:3px;align-items:end;padding:12px 0;border-bottom:1px solid var(--line)}.drawdown-bars span{flex:1;min-height:2px;background:linear-gradient(#f19aa3,#b44a58);border-radius:2px 2px 0 0}.drawdown-panel>p,.rr-state>p{margin:12px 0 0;color:var(--muted);font-size:10px;line-height:1.6}.streak-panel>div{margin-top:13px}.streak-panel p{display:flex;justify-content:space-between;margin:0;padding:8px 0;border-top:1px solid var(--line);color:var(--muted);font-size:11px}.streak-panel b{font:500 11px 'DM Mono',monospace}.rr-state{background:linear-gradient(145deg,rgba(147,150,255,.1),rgba(20,24,37,.7))}.rr-state .eyebrow{margin-bottom:8px}.analysis-tables{display:grid;grid-template-columns:1fr 1fr;gap:12px}.analysis-table{padding:0;overflow:hidden}.analysis-table__heading{padding:20px}.analysis-table__head,.analysis-table__row{display:grid;grid-template-columns:2fr .6fr .9fr 1.1fr 1.1fr;gap:8px;align-items:center}.analysis-table__head{padding:10px 18px;color:var(--faint);background:rgba(255,255,255,.025);font:8px 'DM Mono',monospace}.analysis-table__row{width:100%;padding:12px 18px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--muted);text-align:left;font-size:10px;cursor:pointer;transition:.2s}.analysis-table__row:hover{background:rgba(148,151,255,.07)}.analysis-table__row strong,.analysis-table__row b{color:var(--text);font:500 10px 'DM Mono',monospace}.analysis-table__row b{font-weight:500}.best-worst{margin-top:12px}.best-trade,.worst-trade{border:1px solid var(--line);text-align:left;color:var(--text);cursor:pointer}.best-trade p,.worst-trade p{margin:0 0 8px;color:var(--muted);font-size:10px}.best-trade strong,.worst-trade strong{display:block;margin-top:13px;font:500 20px 'DM Mono',monospace}.calendar-panel{grid-column:span 1}.calendar-days{display:flex;flex-wrap:wrap;gap:6px;margin-top:15px}.calendar-days button{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:#10131d;color:#b5bbca;cursor:pointer}.calendar-days button.gain{border-color:rgba(107,214,164,.35);background:rgba(107,214,164,.1);color:var(--profit)}.calendar-days button.decline{border-color:rgba(238,137,148,.35);background:rgba(238,137,148,.1);color:var(--loss)}.calendar-days b,.calendar-days small{display:block;font:9px 'DM Mono',monospace}.calendar-days small{opacity:.7;font-size:7px}@media(max-width:1040px){.analytics-metrics{grid-template-columns:repeat(3,1fr)}.analytics-split{grid-template-columns:1fr 1fr}.rr-state{grid-column:span 2}.analysis-tables{grid-template-columns:1fr}}@media(max-width:720px){.analytics-page{padding:34px 17px 84px}.analytics-intro h1{font-size:32px}.analytics-metrics{grid-template-columns:repeat(2,1fr);gap:8px}.analytics-split{grid-template-columns:1fr}.rr-state{grid-column:auto}.analysis-table{overflow:auto}.analysis-table__heading{padding:17px}.analysis-table__head,.analysis-table__row{min-width:560px}.best-worst{grid-template-columns:1fr}.calendar-panel{grid-column:auto}}
+/* ═══════════════════════════════════════════════════════════════
+   ANALYTICS PAGE — Terminal Precision
+   ═══════════════════════════════════════════════════════════════ */
+
+.analytics-page {
+  max-width: 1440px;
+  margin: auto;
+  padding: var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.analytics-intro h1 {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--text-high);
+}
+
+.analytics-intro > p:last-child {
+  margin: 8px 0 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── METRICS ROW ── */
+.analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.analytics-metric {
+  padding: 16px;
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius);
+  background: var(--surface-panel);
+  transition: border-color 0.2s;
+}
+
+.analytics-metric:hover {
+  border-color: var(--outline-variant);
+}
+
+.analytics-metric span {
+  display: block;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.analytics-metric strong {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-high);
+}
+
+/* ── ANALYSIS PANELS (Shared) ── */
+.analysis-panel {
+  padding: 20px;
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius);
+  background: var(--surface-panel);
+  transition: border-color 0.2s;
+}
+
+.analysis-panel:hover {
+  border-color: var(--outline-variant);
+}
+
+.analysis-panel__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.analysis-panel__heading h2,
+.analysis-panel h2 {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-high);
+}
+
+.analysis-panel__heading > span {
+  color: var(--text-muted);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+}
+
+/* ── EQUITY CHART (Analytics) ── */
+.equity-lab {
+  margin-bottom: 12px;
+}
+
+.analytics-chart {
+  height: 240px;
+  margin-top: 16px;
+}
+
+.analytics-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.equity-point {
+  cursor: pointer;
+  stroke: var(--surface-canvas);
+  stroke-width: 2;
+  transition: r 0.2s;
+}
+
+.equity-point:hover {
+  r: 8;
+}
+
+.equity-point.gain {
+  fill: var(--profit);
+}
+
+.equity-point.decline {
+  fill: var(--loss);
+}
+
+/* ── SPLIT LAYOUT ── */
+.analytics-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* ── DRAWDOWN ── */
+.drawdown-panel strong {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.drawdown-bars {
+  height: 100px;
+  display: flex;
+  gap: 3px;
+  align-items: end;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-slate);
+}
+
+.drawdown-bars span {
+  flex: 1;
+  min-height: 2px;
+  background: linear-gradient(var(--loss), var(--negative));
+  border-radius: 2px 2px 0 0;
+}
+
+.drawdown-panel > p,
+.rr-state > p {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── STREAKS ── */
+.streak-panel > div {
+  margin-top: 13px;
+}
+
+.streak-panel p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-slate);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.streak-panel b {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── RR STATE ── */
+.rr-state {
+  background: linear-gradient(
+    145deg,
+    rgba(77, 142, 255, 0.08),
+    var(--surface-panel)
+  );
+}
+
+.rr-state .eyebrow {
+  margin-bottom: 8px;
+}
+
+/* ── PERFORMANCE TABLES ── */
+.analysis-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.analysis-table {
+  padding: 0;
+  overflow: hidden;
+}
+
+.analysis-table__heading,
+.analysis-table .analysis-panel__heading {
+  padding: 18px 20px;
+}
+
+.analysis-table__head,
+.analysis-table__row {
+  display: grid;
+  grid-template-columns: 2fr 0.6fr 0.9fr 1.1fr 1.1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.analysis-table__head {
+  padding: 12px 20px;
+  color: var(--text-muted);
+  background: var(--surface-container);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.analysis-table__row {
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  border-top: 1px solid var(--border-slate);
+  background: transparent;
+  color: var(--text-muted);
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.analysis-table__row:hover {
+  background: var(--accent-soft);
+}
+
+.analysis-table__row strong,
+.analysis-table__row b {
+  color: var(--text-high);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── BEST / WORST TRADE ── */
+.best-worst {
+  margin-top: 12px;
+}
+
+.best-trade,
+.worst-trade {
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius);
+  background: var(--surface-panel);
+  text-align: left;
+  color: var(--text-on-surface);
+  cursor: pointer;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.best-trade:hover,
+.worst-trade:hover {
+  border-color: var(--outline-variant);
+}
+
+.best-trade p,
+.worst-trade p {
+  margin: 0 0 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.best-trade strong,
+.worst-trade strong {
+  display: block;
+  margin-top: 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+/* ── CALENDAR ── */
+.calendar-panel {
+  grid-column: span 1;
+}
+
+.calendar-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.calendar-days button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius-sm);
+  background: var(--surface-container);
+  color: var(--text-on-surface-variant);
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+
+.calendar-days button:hover {
+  transform: translateY(-2px);
+}
+
+.calendar-days button.gain {
+  border-color: rgba(78, 222, 163, 0.35);
+  background: rgba(78, 222, 163, 0.1);
+  color: var(--profit);
+}
+
+.calendar-days button.decline {
+  border-color: rgba(255, 178, 183, 0.35);
+  background: rgba(255, 178, 183, 0.1);
+  color: var(--loss);
+}
+
+.calendar-days b,
+.calendar-days small {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+}
+
+.calendar-days small {
+  opacity: 0.7;
+  font-size: 9px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — Analytics
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1040px) {
+  .analytics-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .analytics-split {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rr-state {
+    grid-column: span 2;
+  }
+
+  .analysis-tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .analytics-page {
+    padding: 20px 16px 80px;
+  }
+
+  .analytics-intro h1 {
+    font-size: 28px;
+  }
+
+  .analytics-metrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .analytics-split {
+    grid-template-columns: 1fr;
+  }
+
+  .rr-state {
+    grid-column: auto;
+  }
+
+  .analysis-table {
+    overflow: auto;
+  }
+
+  .analysis-table__heading {
+    padding: 17px;
+  }
+
+  .analysis-table__head,
+  .analysis-table__row {
+    min-width: 560px;
+  }
+
+  .best-worst {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-panel {
+    grid-column: auto;
+  }
+}
