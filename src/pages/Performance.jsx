@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
-import { performanceSummary, groupedPerformance } from "../utils/analytics";
+import { performanceSummary } from "../utils/analytics";
+import { SESSIONS } from "../config/sessions";
+import { toUtcDate } from "../utils/sessions";
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const MIN_SAMPLE_SIZE = 3;
@@ -59,6 +61,66 @@ function applyTimeFilter(trades, filter) {
     if (filter === "ALL") return trades;
     const threshold = DATE_THRESHOLDS[filter];
     return trades.filter((t) => t.date && t.date.slice(0, 10) >= threshold);
+}
+
+// ─── Day-of-week constants ────────────────────────────────────────────────────
+const DOW_LABELS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+// Extract UTC hour from a trade date string (returns null if no time component)
+function getUtcHour(dateStr) {
+    if (!dateStr || !dateStr.includes("T")) return null;
+    const d = toUtcDate(dateStr);
+    return d ? d.getUTCHours() + d.getUTCMinutes() / 60 : null;
+}
+
+// UTC day of week from a trade date string (0=Sun .. 6=Sat)
+function getUtcDow(dateStr) {
+    if (!dateStr) return null;
+    // Accept both date-only (YYYY-MM-DD) and full ISO
+    const d = dateStr.includes("T") ? toUtcDate(dateStr) : new Date(dateStr + "T00:00:00Z");
+    return d && !Number.isNaN(d.getTime()) ? d.getUTCDay() : null;
+}
+
+// Determine UTC hour bucket label, using 4-hour windows
+const HOUR_BUCKETS = [
+    { label: "00–04", start: 0, end: 4 },
+    { label: "04–08", start: 4, end: 8 },
+    { label: "08–12", start: 8, end: 12 },
+    { label: "12–16", start: 12, end: 16 },
+    { label: "16–20", start: 16, end: 20 },
+    { label: "20–24", start: 20, end: 24 },
+];
+
+function getHourBucket(dateStr) {
+    const h = getUtcHour(dateStr);
+    if (h === null) return null;
+    const bucket = HOUR_BUCKETS.find(({ start, end }) => h >= start && h < end);
+    return bucket ? bucket.label : null;
+}
+
+// Build 2-key matrix: { rows: string[], cols: string[], cells: { 'row|col': {arr, avgRVal, n} } }
+function buildMatrix(trades, rowFn, colFn) {
+    const cellMap = new Map();
+    const rowSet = new Set();
+    const colSet = new Set();
+    trades.forEach((t) => {
+        const row = rowFn(t);
+        const col = colFn(t);
+        if (!row || !col) return;
+        rowSet.add(row);
+        colSet.add(col);
+        const key = `${row}|${col}`;
+        if (!cellMap.has(key)) cellMap.set(key, []);
+        cellMap.get(key).push(t);
+    });
+    const rows = [...rowSet];
+    const cols = [...colSet];
+    const cells = {};
+    rows.forEach((r) => cols.forEach((c) => {
+        const arr = cellMap.get(`${r}|${c}`) ?? [];
+        cells[`${r}|${c}`] = { arr, avgRVal: avgR(arr), n: arr.length };
+    }));
+    return { rows, cols, cells };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -229,6 +291,100 @@ export default function Performance({ trades, onSelectTrade }) {
     const directionGroups = useMemo(() => buildGroups(filteredTrades, (t) => t.direction || "Unspecified", "netPnl"), [filteredTrades]);
     const timeframeGroups = useMemo(() => buildGroups(filteredTrades, (t) => t.timeframe || "Unspecified", "netPnl"), [filteredTrades]);
     const sessionGroups = useMemo(() => buildGroups(filteredTrades, (t) => t.session || "Unspecified", "netPnl"), [filteredTrades]);
+
+    // ── Phase 6.4: Day-of-week groups ─────────────────────────────────────
+    const dowGroups = useMemo(() => {
+        const map = new Map();
+        filteredTrades.forEach((t) => {
+            const idx = getUtcDow(t.date);
+            if (idx === null) return;
+            const key = DOW_LABELS[idx];
+            if (!map.has(key)) map.set(key, []);
+            map.get(key).push(t);
+        });
+        // Chronological Mon→Sun order (1→7)
+        const ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        return ORDER
+            .filter((d) => map.has(d))
+            .map((d) => {
+                const items = map.get(d);
+                const s = performanceSummary(items);
+                return { label: d, tradesArr: items, ...s, avgRVal: avgR(items) };
+            });
+    }, [filteredTrades]);
+
+    // ── Phase 6.4: Time-of-day groups ─────────────────────────────────────
+    const timeOfDayGroups = useMemo(() => {
+        const hasTime = filteredTrades.some((t) => t.date?.includes("T"));
+        if (!hasTime) return [];
+        const map = new Map();
+        filteredTrades.forEach((t) => {
+            const b = getHourBucket(t.date);
+            if (!b) return;
+            if (!map.has(b)) map.set(b, []);
+            map.get(b).push(t);
+        });
+        return HOUR_BUCKETS
+            .filter(({ label }) => map.has(label))
+            .map(({ label }) => {
+                const items = map.get(label);
+                const s = performanceSummary(items);
+                return { label, tradesArr: items, ...s, avgRVal: avgR(items) };
+            });
+    }, [filteredTrades]);
+
+    // ── Phase 6.4: Session × Instrument matrix ────────────────────────────
+    const sessionInstMatrix = useMemo(() => {
+        // Use canonical session ordering from config
+        const sessionOrder = SESSIONS.map((s) => s.id);
+        const raw = buildMatrix(
+            filteredTrades,
+            (t) => t.session || null,
+            (t) => t.pair || null
+        );
+        // Sort rows by session config order, cols by trade volume desc
+        const rows = sessionOrder.filter((id) => raw.rows.includes(id));
+        const colVolume = (c) => raw.rows.reduce((sum, r) => sum + (raw.cells[`${r}|${c}`]?.n ?? 0), 0);
+        const cols = [...raw.cols].sort((a, b) => colVolume(b) - colVolume(a)).slice(0, 8);
+        return { rows, cols, cells: raw.cells };
+    }, [filteredTrades]);
+
+    // ── Phase 6.4: Session × Direction matrix ─────────────────────────────
+    const sessionDirMatrix = useMemo(() => {
+        const sessionOrder = SESSIONS.map((s) => s.id);
+        const raw = buildMatrix(
+            filteredTrades,
+            (t) => t.session || null,
+            (t) => t.direction || null
+        );
+        const rows = sessionOrder.filter((id) => raw.rows.includes(id));
+        return { rows, cols: raw.cols, cells: raw.cells };
+    }, [filteredTrades]);
+
+    // ── Phase 6.4: Session label resolver ─────────────────────────────────
+    const sessionLabel = (id) => SESSIONS.find((s) => s.id === id)?.label ?? id;
+
+    // ── Phase 6.4: Window rankings (sessions + dow + time-of-day combined) ─
+    const allWindows = useMemo(() => {
+        const tag = (grp, category) =>
+            grp
+                .filter((g) => g.trades >= MIN_SAMPLE_SIZE)
+                .map((g) => ({ ...g, category }));
+        return [
+            ...tag(sessionGroups.filter((g) => g.label !== "Unspecified"), "Session"),
+            ...tag(dowGroups, "Day"),
+            ...tag(timeOfDayGroups, "Time UTC"),
+        ];
+    }, [sessionGroups, dowGroups, timeOfDayGroups]);
+
+    const topWindows = useMemo(
+        () => [...allWindows].sort((a, b) => (b.avgRVal ?? -Infinity) - (a.avgRVal ?? -Infinity)).slice(0, 7),
+        [allWindows]
+    );
+    const lowWindows = useMemo(
+        () => [...allWindows].sort((a, b) => (a.avgRVal ?? Infinity) - (b.avgRVal ?? Infinity)).slice(0, 7),
+        [allWindows]
+    );
 
     // ── 5. Instrument × Setup Matrix ──────────────────────────────────────
     // Collect unique instruments and setups (with ≥ MIN_SAMPLE_SIZE total)
@@ -618,6 +774,312 @@ export default function Performance({ trades, onSelectTrade }) {
                                     </div>
                                 </Section>
                             </div>
+
+                            {/* ═══════════════════════════════════════════════
+                                PHASE 6.4 — SESSION & TIME-OF-DAY SECTIONS
+                            ════════════════════════════════════════════════ */}
+
+                            {/* ── SESSION PERFORMANCE (full detail) ─────────── */}
+                            {sessionGroups.some((g) => g.label !== "Unspecified" && g.trades >= 1) ? (
+                                <Section title="Session Performance" subtitle="UTC session windows · min. sample enforced">
+                                    <div className="overflow-x-auto custom-scrollbar">
+                                        <div className="min-w-[700px]">
+                                            <GroupHeader col1="Session" />
+                                            {sessionGroups
+                                                .filter((g) => g.label !== "Unspecified")
+                                                .map((g) => (
+                                                    <GroupRow
+                                                        key={g.label}
+                                                        display={sessionLabel(g.label)}
+                                                        group={g}
+                                                        onDrillDown={drillDown}
+                                                    />
+                                                ))}
+                                        </div>
+                                    </div>
+                                </Section>
+                            ) : (
+                                <Section title="Session Performance">
+                                    <div className="flex items-center gap-2 px-5 py-6 text-text-muted">
+                                        <span className="material-symbols-outlined text-[16px]">info</span>
+                                        <span className="text-[9px] font-label-caps tracking-widest">SESSION DATA UNAVAILABLE — trades do not contain session field values</span>
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── DAY OF WEEK ───────────────────────────────── */}
+                            {dowGroups.length > 0 && (
+                                <Section title="Day of Week Performance" subtitle="Based on UTC trade date">
+                                    <div className="divide-y divide-border-slate/30">
+                                        {dowGroups.map((g) => {
+                                            const hasData = g.trades >= MIN_SAMPLE_SIZE;
+                                            return (
+                                                <div key={g.label} className="flex flex-wrap items-center gap-4 px-4 py-3 hover:bg-surface-hover transition-colors group">
+                                                    <div className="flex flex-col min-w-[100px]">
+                                                        <span className="text-[11px] font-label-caps text-text-high-contrast uppercase">{g.label}</span>
+                                                        <span className="text-[9px] font-data-mono-sm text-text-muted">n={g.trades}</span>
+                                                    </div>
+                                                    {hasData ? (
+                                                        <div className="flex flex-wrap gap-5 flex-1">
+                                                            <StatCell label="Win Rate" value={fmtPct(g.winRate)} accent={g.winRate >= 0.5 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Net P&L" value={fmtPnl(g.netPnl)} accent={g.netPnl >= 0 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Avg R" value={fmtR(g.avgRVal)} accent={g.avgRVal >= 0 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Prof. Factor" value={fmtPF(g.profitFactor)} />
+                                                        </div>
+                                                    ) : (
+                                                        <InsufficientSample n={g.trades} />
+                                                    )}
+                                                    {g.trades > 0 && (
+                                                        <button
+                                                            onClick={() => drillDown(g.tradesArr)}
+                                                            className="text-[8px] font-label-caps text-primary bg-primary/10 hover:bg-primary hover:text-on-primary px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ml-auto whitespace-nowrap"
+                                                            aria-label={`View ${g.trades} ${g.label} trades`}
+                                                        >
+                                                            VIEW&nbsp;{g.trades}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── TIME OF DAY ───────────────────────────────── */}
+                            {timeOfDayGroups.length > 0 ? (
+                                <Section title="Time of Day Performance (UTC)" subtitle={`4-hour UTC windows · only shown when trade timestamps include time component`}>
+                                    <div className="divide-y divide-border-slate/30">
+                                        {timeOfDayGroups.map((g) => {
+                                            const hasData = g.trades >= MIN_SAMPLE_SIZE;
+                                            // Overlay which sessions are active in this bucket
+                                            const bucketStart = HOUR_BUCKETS.find((b) => b.label === g.label)?.start ?? 0;
+                                            const activeSessions = SESSIONS.filter(({ start, end }) =>
+                                                start > end ? bucketStart >= start || bucketStart < end : bucketStart >= start && bucketStart < end
+                                            ).map((s) => s.label);
+                                            return (
+                                                <div key={g.label} className="flex flex-wrap items-center gap-4 px-4 py-3 hover:bg-surface-hover transition-colors group">
+                                                    <div className="flex flex-col min-w-[100px]">
+                                                        <span className="text-[11px] font-data-mono text-text-high-contrast">{g.label} UTC</span>
+                                                        <div className="flex flex-wrap gap-1 mt-0.5">
+                                                            {activeSessions.map((s) => (
+                                                                <span key={s} className="text-[7px] font-label-caps text-primary/70 bg-primary/10 px-1 py-0.5 rounded">{s}</span>
+                                                            ))}
+                                                        </div>
+                                                        <span className="text-[9px] font-data-mono-sm text-text-muted mt-0.5">n={g.trades}</span>
+                                                    </div>
+                                                    {hasData ? (
+                                                        <div className="flex flex-wrap gap-5 flex-1">
+                                                            <StatCell label="Win Rate" value={fmtPct(g.winRate)} accent={g.winRate >= 0.5 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Net P&L" value={fmtPnl(g.netPnl)} accent={g.netPnl >= 0 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Avg R" value={fmtR(g.avgRVal)} accent={g.avgRVal >= 0 ? "text-positive" : "text-negative"} />
+                                                            <StatCell label="Prof. Factor" value={fmtPF(g.profitFactor)} />
+                                                        </div>
+                                                    ) : (
+                                                        <InsufficientSample n={g.trades} />
+                                                    )}
+                                                    {g.trades > 0 && (
+                                                        <button
+                                                            onClick={() => drillDown(g.tradesArr)}
+                                                            className="text-[8px] font-label-caps text-primary bg-primary/10 hover:bg-primary hover:text-on-primary px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ml-auto whitespace-nowrap"
+                                                            aria-label={`View ${g.trades} ${g.label} UTC trades`}
+                                                        >
+                                                            VIEW&nbsp;{g.trades}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </Section>
+                            ) : (
+                                <Section title="Time of Day Performance (UTC)">
+                                    <div className="flex items-center gap-2 px-5 py-5 text-text-muted">
+                                        <span className="material-symbols-outlined text-[16px]">schedule</span>
+                                        <span className="text-[9px] font-label-caps tracking-widest">TIME DATA UNAVAILABLE — trade records do not include a time component (require YYYY-MM-DDTHH:mm:ssZ format)</span>
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── SESSION × INSTRUMENT MATRIX ───────────────── */}
+                            {(sessionInstMatrix.rows.length > 0 && sessionInstMatrix.cols.length > 0) && (
+                                <Section title="Session × Instrument Performance Matrix" subtitle={`Avg R per cell · n < ${MIN_SAMPLE_SIZE} = insufficient sample`}>
+                                    <div className="overflow-x-auto custom-scrollbar">
+                                        <table className="min-w-max w-full text-left border-collapse" role="grid" aria-label="Session vs Instrument performance matrix">
+                                            <thead>
+                                                <tr className="bg-surface-canvas border-b border-border-slate">
+                                                    <th className="text-[8px] font-label-caps text-text-muted uppercase tracking-widest px-4 py-2 sticky left-0 bg-surface-canvas z-10 min-w-[110px]">Session</th>
+                                                    {sessionInstMatrix.cols.map((c) => (
+                                                        <th key={c} className="text-[8px] font-label-caps text-text-muted uppercase tracking-widest px-3 py-2 text-center whitespace-nowrap">{normalisePair(c)}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {sessionInstMatrix.rows.map((row, ri) => (
+                                                    <tr key={row} className={`border-b border-border-slate/30 hover:bg-surface-hover transition-colors ${ri % 2 === 1 ? "bg-surface-canvas/30" : ""}`}>
+                                                        <td className="px-4 py-2.5 sticky left-0 bg-inherit z-10">
+                                                            <span className="text-[11px] font-label-caps text-text-high-contrast">{sessionLabel(row)}</span>
+                                                        </td>
+                                                        {sessionInstMatrix.cols.map((col) => {
+                                                            const cell = sessionInstMatrix.cells[`${row}|${col}`];
+                                                            const hasSample = cell && cell.n >= MIN_SAMPLE_SIZE;
+                                                            return (
+                                                                <td key={col} className="px-3 py-2.5 text-center">
+                                                                    {hasSample ? (
+                                                                        <button
+                                                                            onClick={() => drillDown(cell.arr)}
+                                                                            className="flex flex-col items-center gap-0.5 w-full hover:bg-surface-hover rounded px-1 py-0.5 transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
+                                                                            aria-label={`${sessionLabel(row)} ${normalisePair(col)}: ${fmtR(cell.avgRVal)}, n=${cell.n}`}
+                                                                        >
+                                                                            <span className={`text-[11px] font-data-mono ${cell.avgRVal >= 0 ? "text-positive" : "text-negative"}`}>{fmtR(cell.avgRVal)}</span>
+                                                                            <span className="text-[8px] font-data-mono-sm text-text-muted">n={cell.n}</span>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="text-[9px] font-data-mono-sm text-text-muted/40">{cell && cell.n > 0 ? `n=${cell.n}` : "--"}</span>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── SESSION × DIRECTION MATRIX ────────────────── */}
+                            {(sessionDirMatrix.rows.length > 0 && sessionDirMatrix.cols.length > 0) && (
+                                <Section title="Session × Direction Performance Matrix" subtitle="Win Rate and Avg R per session / direction combination">
+                                    <div className="overflow-x-auto custom-scrollbar">
+                                        <table className="min-w-max w-full text-left border-collapse" role="grid" aria-label="Session vs Direction matrix">
+                                            <thead>
+                                                <tr className="bg-surface-canvas border-b border-border-slate">
+                                                    <th className="text-[8px] font-label-caps text-text-muted uppercase tracking-widest px-4 py-2 sticky left-0 bg-surface-canvas z-10 min-w-[110px]">Session</th>
+                                                    {sessionDirMatrix.cols.map((c) => (
+                                                        <th key={c} colSpan={2} className="text-[8px] font-label-caps text-text-muted uppercase tracking-widest px-3 py-2 text-center whitespace-nowrap border-l border-border-slate/30">{c}</th>
+                                                    ))}
+                                                </tr>
+                                                <tr className="bg-surface-canvas/50 border-b border-border-slate">
+                                                    <th className="sticky left-0 bg-surface-canvas/50 z-10" />
+                                                    {sessionDirMatrix.cols.map((c) => (
+                                                        <>
+                                                            <th key={`${c}-wr`} className="text-[7px] font-label-caps text-text-muted tracking-widest px-2 py-1 text-center border-l border-border-slate/30">Win Rate</th>
+                                                            <th key={`${c}-r`} className="text-[7px] font-label-caps text-text-muted tracking-widest px-2 py-1 text-center">Avg R</th>
+                                                        </>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {sessionDirMatrix.rows.map((row, ri) => (
+                                                    <tr key={row} className={`border-b border-border-slate/30 hover:bg-surface-hover transition-colors ${ri % 2 === 1 ? "bg-surface-canvas/30" : ""}`}>
+                                                        <td className="px-4 py-2.5 sticky left-0 bg-inherit z-10">
+                                                            <span className="text-[11px] font-label-caps text-text-high-contrast">{sessionLabel(row)}</span>
+                                                        </td>
+                                                        {sessionDirMatrix.cols.map((col) => {
+                                                            const cell = sessionDirMatrix.cells[`${row}|${col}`];
+                                                            const hasSample = cell && cell.n >= MIN_SAMPLE_SIZE;
+                                                            const s = cell?.n ? performanceSummary(cell.arr) : null;
+                                                            const r = cell?.n ? avgR(cell.arr) : null;
+                                                            return (
+                                                                <>
+                                                                    <td key={`${col}-wr`} className="px-2 py-2.5 text-center border-l border-border-slate/20">
+                                                                        {hasSample ? (
+                                                                            <button onClick={() => drillDown(cell.arr)}
+                                                                                className="flex flex-col items-center w-full hover:bg-surface-hover rounded px-1 py-0.5 transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
+                                                                                aria-label={`${sessionLabel(row)} ${col}: WR ${fmtPct(s?.winRate)}`}>
+                                                                                <span className={`text-[10px] font-data-mono ${s?.winRate >= 0.5 ? "text-positive" : "text-negative"}`}>{fmtPct(s?.winRate)}</span>
+                                                                                <span className="text-[8px] font-data-mono-sm text-text-muted">n={cell.n}</span>
+                                                                            </button>
+                                                                        ) : (
+                                                                            <span className="text-[9px] text-text-muted/40">{cell && cell.n > 0 ? `n=${cell.n}` : "--"}</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td key={`${col}-r`} className="px-2 py-2.5 text-center">
+                                                                        {hasSample ? (
+                                                                            <span className={`text-[10px] font-data-mono ${r >= 0 ? "text-positive" : "text-negative"}`}>{fmtR(r)}</span>
+                                                                        ) : (
+                                                                            <span className="text-[9px] text-text-muted/40">--</span>
+                                                                        )}
+                                                                    </td>
+                                                                </>
+                                                            );
+                                                        })}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </Section>
+                            )}
+
+                            {/* ── BEST / LOWEST HISTORICAL WINDOWS ─────────── */}
+                            {allWindows.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Best Windows */}
+                                    <Section title="Best Historical Windows" subtitle="Sessions · Days · Time buckets · ranked by Avg R">
+                                        <div className="divide-y divide-border-slate/30">
+                                            {topWindows.map((g, i) => (
+                                                <div key={`${g.category}-${g.label}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-hover transition-colors group">
+                                                    <span className="text-[10px] font-data-mono text-text-muted w-5 shrink-0">#{i + 1}</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] font-label-caps text-text-high-contrast truncate">
+                                                                {g.category === "Session" ? sessionLabel(g.label) : g.label}
+                                                            </span>
+                                                            <span className="text-[7px] font-label-caps text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded shrink-0">{g.category}</span>
+                                                        </div>
+                                                        <span className="text-[9px] font-data-mono-sm text-text-muted">n={g.trades}</span>
+                                                    </div>
+                                                    <StatCell label="WR" value={fmtPct(g.winRate)} accent={g.winRate >= 0.5 ? "text-positive" : "text-negative"} />
+                                                    <StatCell label="Avg R" value={fmtR(g.avgRVal)} accent={g.avgRVal >= 0 ? "text-positive" : "text-negative"} />
+                                                    <StatCell label="P&L" value={fmtPnl(g.netPnl)} accent={g.netPnl >= 0 ? "text-positive" : "text-negative"} />
+                                                    {g.trades > 0 && (
+                                                        <button
+                                                            onClick={() => drillDown(g.tradesArr)}
+                                                            className="text-[8px] font-label-caps text-primary bg-primary/10 hover:bg-primary hover:text-on-primary px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 whitespace-nowrap shrink-0"
+                                                            aria-label={`View trades for ${g.label}`}
+                                                        >
+                                                            VIEW
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Section>
+
+                                    {/* Lowest Windows */}
+                                    <Section title="Lowest Historical Windows" subtitle="Neutral historical analysis · ranked by Avg R">
+                                        <div className="divide-y divide-border-slate/30">
+                                            {lowWindows.map((g, i) => (
+                                                <div key={`${g.category}-${g.label}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-hover transition-colors group">
+                                                    <span className="text-[10px] font-data-mono text-text-muted w-5 shrink-0">#{i + 1}</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] font-label-caps text-text-high-contrast truncate">
+                                                                {g.category === "Session" ? sessionLabel(g.label) : g.label}
+                                                            </span>
+                                                            <span className="text-[7px] font-label-caps text-text-muted/60 bg-surface-canvas px-1.5 py-0.5 rounded border border-border-slate/40 shrink-0">{g.category}</span>
+                                                        </div>
+                                                        <span className="text-[9px] font-data-mono-sm text-text-muted">n={g.trades}</span>
+                                                    </div>
+                                                    <StatCell label="WR" value={fmtPct(g.winRate)} accent={g.winRate >= 0.5 ? "text-positive" : "text-negative"} />
+                                                    <StatCell label="Avg R" value={fmtR(g.avgRVal)} accent={g.avgRVal >= 0 ? "text-positive" : "text-negative"} />
+                                                    <StatCell label="P&L" value={fmtPnl(g.netPnl)} accent={g.netPnl >= 0 ? "text-positive" : "text-negative"} />
+                                                    {g.trades > 0 && (
+                                                        <button
+                                                            onClick={() => drillDown(g.tradesArr)}
+                                                            className="text-[8px] font-label-caps text-primary bg-primary/10 hover:bg-primary hover:text-on-primary px-2 py-1 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 whitespace-nowrap shrink-0"
+                                                            aria-label={`View trades for ${g.label}`}
+                                                        >
+                                                            VIEW
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Section>
+                                </div>
+                            )}
 
                         </>
                     )}
