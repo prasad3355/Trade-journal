@@ -1577,89 +1577,98 @@ button {
     transform: none;
   }
 }
- / *   C u s t o m   s c r o l l b a r   f o r   t e r m i n a l   f e e l   * / 
- : : - w e b k i t - s c r o l l b a r   { 
-         w i d t h :   6 p x ; 
-         h e i g h t :   6 p x ; 
- } 
- : : - w e b k i t - s c r o l l b a r - t r a c k   { 
-         b a c k g r o u n d :   t r a n s p a r e n t ; 
- } 
- : : - w e b k i t - s c r o l l b a r - t h u m b   { 
-         b a c k g r o u n d :   r g b a ( 3 0 ,   4 1 ,   5 9 ,   0 . 8 ) ; 
-         b o r d e r - r a d i u s :   9 9 9 9 p x ; 
- } 
- : : - w e b k i t - s c r o l l b a r - t h u m b : h o v e r   { 
-         b a c k g r o u n d :   r g b a ( 7 1 ,   8 5 ,   1 0 5 ,   0 . 8 ) ; 
- } 
- : : - w e b k i t - s c r o l l b a r - c o r n e r   { 
-         b a c k g r o u n d :   t r a n s p a r e n t ; 
- } 
-  
- 
- / *   E n h a n c e d   F o r m   C o n t r o l s   f o r   T e r m i n a l   A e s t h e t i c   * / 
- s e l e c t   { 
-         a p p e a r a n c e :   n o n e ; 
-         - w e b k i t - a p p e a r a n c e :   n o n e ; 
-         b a c k g r o u n d - i m a g e :   u r l ( ' d a t a : i m a g e / s v g + x m l ; c h a r s e t = U S - A S C I I , % 3 C s v g % 2 0 x m l n s % 3 D % 2 2 h t t p % 3 A % 2 F % 2 F w w w . w 3 . o r g % 2 F 2 0 0 0 % 2 F s v g % 2 2 % 2 0 w i d t h % 3 D % 2 2 2 9 2 . 4 % 2 2 % 2 0 h e i g h t % 3 D % 2 2 2 9 2 . 4 % 2 2 % 3 E % 3 C p a t h % 2 0 f i l l % 3 D % 2 2 % 2 3 9 4 a 3 b 8 % 2 2 % 2 0 d % 3 D % 2 2 M 2 8 7 % 2 0 6 9 . 4 a 1 7 . 6 % 2 0 1 7 . 6 % 2 0 0 % 2 0 0 % 2 0 0 - 1 3 - 5 . 4 H 1 8 . 4 c - 5 % 2 0 0 - 9 . 3 % 2 0 1 . 8 - 1 2 . 9 % 2 0 5 . 4 A 1 7 . 6 % 2 0 1 7 . 6 % 2 0 0 % 2 0 0 % 2 0 0 % 2 0 0 % 2 0 8 2 . 2 c 0 % 2 0 5 % 2 0 1 . 8 % 2 0 9 . 3 % 2 0 5 . 4 % 2 0 1 2 . 9 l 1 2 8 % 2 0 1 2 7 . 9 c 3 . 6 % 2 0 3 . 6 % 2 0 7 . 8 % 2 0 5 . 4 % 2 0 1 2 . 8 % 2 0 5 . 4 s 9 . 2 - 1 . 8 % 2 0 1 2 . 8 - 5 . 4 L 2 8 7 % 2 0 9 5 c 3 . 5 - 3 . 5 % 2 0 5 . 4 - 7 . 8 % 2 0 5 . 4 - 1 2 . 8 % 2 0 0 - 5 - 1 . 9 - 9 . 2 - 5 . 5 - 1 2 . 8 z % 2 2 % 2 F % 3 E % 3 C % 2 F s v g % 3 E ' )   ! i m p o r t a n t ; 
-         b a c k g r o u n d - r e p e a t :   n o - r e p e a t   ! i m p o r t a n t ; 
-         b a c k g r o u n d - p o s i t i o n :   r i g h t   0 . 7 5 r e m   c e n t e r   ! i m p o r t a n t ; 
-         b a c k g r o u n d - s i z e :   0 . 6 5 e m   a u t o   ! i m p o r t a n t ; 
-         p a d d i n g - r i g h t :   2 r e m   ! i m p o r t a n t ; 
- } 
- 
- i n p u t [ t y p e = \  
- d a t e t i m e - l o c a l \ ] : : - w e b k i t - c a l e n d a r - p i c k e r - i n d i c a t o r   { 
-         f i l t e r :   i n v e r t ( 1 ) ; 
-         o p a c i t y :   0 . 5 ; 
-         c u r s o r :   p o i n t e r ; 
- } 
- i n p u t [ t y p e = \ d a t e t i m e - l o c a l \ ] : : - w e b k i t - c a l e n d a r - p i c k e r - i n d i c a t o r : h o v e r   { 
-         o p a c i t y :   1 ; 
- } 
-  
- 
- / *   T e c h n i c a l   G r i d   B a c k g r o u n d   f o r   P h a s e   1   * / 
- b o d y ,   . b g - s u r f a c e - c a n v a s   { 
-     b a c k g r o u n d - c o l o r :   v a r ( - - s u r f a c e - c a n v a s )   ! i m p o r t a n t ; 
-     b a c k g r o u n d - i m a g e :   
-         r a d i a l - g r a d i e n t ( c i r c l e   a t   5 0 %   0 % ,   r g b a ( 7 7 ,   1 4 2 ,   2 5 5 ,   0 . 0 3 )   0 % ,   t r a n s p a r e n t   6 0 % ) , 
-         l i n e a r - g r a d i e n t ( r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 1 5 )   1 p x ,   t r a n s p a r e n t   1 p x ) , 
-         l i n e a r - g r a d i e n t ( 9 0 d e g ,   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 1 5 )   1 p x ,   t r a n s p a r e n t   1 p x )   ! i m p o r t a n t ; 
-     b a c k g r o u n d - s i z e :   1 0 0 %   1 0 0 % ,   3 2 p x   3 2 p x ,   3 2 p x   3 2 p x   ! i m p o r t a n t ; 
-     b a c k g r o u n d - p o s i t i o n :   c e n t e r   t o p ,   c e n t e r   c e n t e r ,   c e n t e r   c e n t e r   ! i m p o r t a n t ; 
-     b a c k g r o u n d - a t t a c h m e n t :   f i x e d   ! i m p o r t a n t ; 
- } 
- 
- / *   G l o b a l   i n p u t s   f o r   P h a s e   1   t e r m i n a l   c o n t r o l s   * / 
- i n p u t : n o t ( [ t y p e = \  
- f i l e \ ] ) : n o t ( [ t y p e = \ c h e c k b o x \ ] ) : n o t ( [ t y p e = \ r a d i o \ ] ) ,   t e x t a r e a   { 
-     b a c k g r o u n d - c o l o r :   v a r ( - - s u r f a c e - c o n t a i n e r - h i g h )   ! i m p o r t a n t ; 
-     b o r d e r :   1 p x   s o l i d   v a r ( - - o u t l i n e - v a r i a n t )   ! i m p o r t a n t ; 
-     c o l o r :   v a r ( - - t e x t - o n - s u r f a c e )   ! i m p o r t a n t ; 
-     b o r d e r - r a d i u s :   v a r ( - - r a d i u s - s m )   ! i m p o r t a n t ; 
- } 
- i n p u t : f o c u s ,   t e x t a r e a : f o c u s ,   s e l e c t : f o c u s   { 
-     b o r d e r - c o l o r :   v a r ( - - p r i m a r y )   ! i m p o r t a n t ; 
-     b o x - s h a d o w :   0   0   0   1 p x   v a r ( - - p r i m a r y - c o n t a i n e r )   ! i m p o r t a n t ; 
-     o u t l i n e :   n o n e   ! i m p o r t a n t ; 
- } 
-  
- 
- / *   G l a s s   D e p t h   A r c h i t e c t u r e   * / 
- . g l a s s - p a n e l   { 
-     b a c k g r o u n d :   r g b a ( 1 5 ,   2 3 ,   4 2 ,   0 . 7 5 )   ! i m p o r t a n t ; 
-     b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x )   ! i m p o r t a n t ; 
-     - w e b k i t - b a c k d r o p - f i l t e r :   b l u r ( 1 2 p x )   ! i m p o r t a n t ; 
-     b o r d e r :   1 p x   s o l i d   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 5 )   ! i m p o r t a n t ; 
- } 
-  
- 
- / *   H e a t m a p   S q u a r e   b a s e   c l a s s   f o r   D a s h b o a r d   P h a s e   2   * / 
- . h e a t m a p - s q   { 
-         b o r d e r - r a d i u s :   2 p x ; 
-         w i d t h :   1 0 0 % ; 
-         a s p e c t - r a t i o :   1 / 1 ; 
- } 
-  
- 
+
+
+
+/* Custom scrollbar for terminal feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+
+/* Enhanced Form Controls for Terminal Aesthetic */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 0.65em auto !important;
+  padding-right: 2rem !important;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+
+/* Technical Grid Background for Phase 1 */
+body,
+.bg-surface-canvas {
+  background-color: var(--surface-canvas) !important;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(77, 142, 255, 0.03) 0%, transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 32px 32px, 32px 32px !important;
+  background-position: center top, center center, center center !important;
+  background-attachment: fixed !important;
+}
+
+/* Global inputs for Phase 1 terminal controls */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+textarea {
+  background-color: var(--surface-container-high) !important;
+  border: 1px solid var(--outline-variant) !important;
+  color: var(--text-on-surface) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary-container) !important;
+  outline: none !important;
+}
+
+
+/* Glass Depth Architecture */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+
+/* Heatmap Square base class for Dashboard Phase 2 */
+.heatmap-sq {
+  border-radius: 2px;
+  width: 100%;
+  aspect-ratio: 1/1;
+}

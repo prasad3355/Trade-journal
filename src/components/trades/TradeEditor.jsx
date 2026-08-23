@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTrades } from "../../context/TradeContext";
+import { useSettings } from "../../context/SettingsContext";
 import { classifySession } from "../../utils/sessions";
 
 // QUICK SELECT OPTIONS
-const QUICK_INSTRUMENTS = ["XAUUSD", "NAS100", "US30", "BTCUSD", "EURUSD", "GBPUSD"];
 const ASSET_CLASSES = ["FOREX", "METALS", "INDICES", "CRYPTO", "STOCKS", "OTHER"];
 const EXIT_LOGICS = ["MANUAL CLOSE", "SL HIT", "TP HIT", "BREAKEVEN", "TRAILING SL"];
 const CONFIDENCE_LEVELS = ["HIGH", "MEDIUM", "LOW"];
@@ -11,6 +11,7 @@ const EMOTIONS = ["CALM", "FOCUSED", "TILTED", "ANXIOUS", "EUPHORIC"];
 
 export default function TradeEditor({ initialData, onClose }) {
   const { addTrade, updateTrade, trades } = useTrades();
+  const { settings } = useSettings();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -18,27 +19,27 @@ export default function TradeEditor({ initialData, onClose }) {
     const defaultData = {
       id: `trade-${Date.now()}`,
       date: new Date().toISOString().slice(0, 16),
-      pair: "",
-      assetClass: "FOREX",
-      direction: "LONG",
+      pair: settings?.trading?.defaultInstrument || "",
+      assetClass: settings?.trading?.defaultAssetClass || "FOREX",
+      direction: settings?.trading?.defaultDirection || "LONG",
       lots: "",
       entry: "",
       exit: "",
       stopLoss: "",
       target: "",
-      setup: "",
+      setup: settings?.trading?.defaultSetup || "",
       thesis: "", // pre-trade context
       learning: "", // post-trade notes
-      timeframe: "CURRENT",
-      exitLogic: "MANUAL CLOSE",
+      timeframe: settings?.trading?.defaultTimeframe || "CURRENT",
+      exitLogic: settings?.trading?.defaultExitLogic || "MANUAL CLOSE",
       pnl: "",
       rr: "",
       rulesFollowed: "YES",
       moneyManagement: "YES",
-      risk: "HALF",
-      confidence: "HIGH",
-      emotion: "CALM",
-      preTradeBias: "NEUTRAL",
+      risk: settings?.trading?.defaultRisk || "HALF",
+      confidence: settings?.trading?.defaultConfidence || "HIGH",
+      emotion: settings?.trading?.defaultEmotion || "CALM",
+      preTradeBias: settings?.trading?.defaultPreTradeBias || "NEUTRAL",
       image: null,
       images: [],
       checklist: {
@@ -326,7 +327,7 @@ export default function TradeEditor({ initialData, onClose }) {
                       className="w-1/3 bg-surface-container-high border-2 border-border-slate rounded-sm text-text-high-contrast px-4 py-3 text-lg font-data-mono-md uppercase focus:border-primary outline-none transition-colors" />
 
                     <div className="flex-1 flex flex-wrap gap-1.5 overflow-hidden">
-                      {QUICK_INSTRUMENTS.map(p => (
+                      {(settings?.instruments?.quickSelect || []).map(p => (
                         <button type="button" key={p} onClick={() => setField('pair', p)}
                           className="px-3 py-1 flex-1 min-w-[70px] text-xs font-data-mono-sm uppercase rounded-sm border border-border-slate bg-surface hover:bg-surface-container hover:text-text-high-contrast text-text-muted transition-colors">
                           {p}

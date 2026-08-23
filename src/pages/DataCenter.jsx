@@ -407,11 +407,15 @@ export default function DataCenter() {
         setImportError(null);
 
         try {
+            // Capture pre-import DB count from IDB directly (not stale React state)
+            const preImportTrades = await getAllTrades();
+            const preImportCount = preImportTrades.length;
+
             await createRollbackSnapshot();
             await saveTradesToDB(toImport);
 
             const finalTrades = await getAllTrades();
-            if (finalTrades.length < trades.length + toImport.length) throw new Error("Count mismatch verification failed.");
+            if (finalTrades.length < preImportCount + toImport.length) throw new Error("Count mismatch verification failed.");
 
             await reloadTrades();
             setSpreadsheetAnalysis(null);
@@ -454,7 +458,7 @@ export default function DataCenter() {
 
                 let newTrades = [];
                 let existingCount = 0;
-                let possibleDuplicateCount = 0;
+                let possibleDuplicates = [];
                 let invalidCount = 0;
 
                 json.trades.forEach(inTrade => {
@@ -478,13 +482,7 @@ export default function DataCenter() {
                     });
 
                     if (isSoft) {
-                        possibleDuplicateCount++;
-                        // Based on instructions: Skip hard, ask user for soft, but default append-only safe.
-                        // We will flag them, but for this phase we only auto-import truly NEW non-conflicting.
-                        // Actually, the rules say "POSSIBLE DUPLICATE -> ASK USER... keep first version append-only and safe."
-                        // Because UI checkboxes are complex for a single array, we will just count them and OMIT them from `newTrades`.
-                        // Wait! the prompt says: "If overwrite functionality is not necessary... DO NOT implement it."
-                        // So we will JUST insert strictly NEW.
+                        possibleDuplicates.push(inTrade);
                     } else {
                         newTrades.push(inTrade);
                     }
@@ -494,7 +492,7 @@ export default function DataCenter() {
                     totalIncoming: json.trades.length,
                     newTrades,
                     existingCount,
-                    possibleDuplicateCount,
+                    possibleDuplicates,
                     invalidCount,
                     rawJson: json
                 });
@@ -519,19 +517,23 @@ export default function DataCenter() {
         setImportError(null);
 
         try {
-            // 1. Snapshot
+            // 1. Capture pre-import DB count from IDB directly (not stale React state)
+            const preImportTrades = await getAllTrades();
+            const preImportCount = preImportTrades.length;
+
+            // 2. Snapshot
             await createRollbackSnapshot();
 
-            // 2. Import New
+            // 3. Import New
             await saveTradesToDB(importAnalysis.newTrades);
 
-            // 3. Verify
+            // 4. Verify against the IDB baseline taken before writes
             const finalTrades = await getAllTrades();
-            if (finalTrades.length < trades.length + importAnalysis.newTrades.length) {
+            if (finalTrades.length < preImportCount + importAnalysis.newTrades.length) {
                 throw new Error("Verification failed! Count mismatch.");
             }
 
-            // 4. Reload System
+            // 5. Reload System
             await reloadTrades();
 
             setImportAnalysis(null);
@@ -547,6 +549,35 @@ export default function DataCenter() {
         }
     };
 
+
+    // -------------------------------------------------------------
+    // SPREADSHEET EXPORT HANDLERS
+    // -------------------------------------------------------------
+    const handleCsvExport = () => {
+        if (trades.length === 0) {
+            setImportError("No trades to export. Add trades before exporting CSV.");
+            return;
+        }
+        try {
+            exportTradesToCSV(trades);
+        } catch (e) {
+            console.error("CSV export failed:", e);
+            setImportError("CSV export failed. Check console for details.");
+        }
+    };
+
+    const handleExcelExport = () => {
+        if (trades.length === 0) {
+            setImportError("No trades to export. Add trades before exporting Excel.");
+            return;
+        }
+        try {
+            exportTradesToExcel(trades);
+        } catch (e) {
+            console.error("Excel export failed:", e);
+            setImportError("Excel export failed. Check console for details.");
+        }
+    };
 
     return (
         <div className="flex-1 flex flex-col h-full bg-surface-canvas overflow-y-auto w-full p-4 md:p-8 pt-20 lg:pt-8 custom-scrollbar">
@@ -593,7 +624,7 @@ export default function DataCenter() {
                             </span>
                         </div>
                     </section>
-                    
+
                     {/* IMAGE INTEGRITY */}
                     <section className="bg-surface-panel border border-border-slate rounded-lg p-5 shadow-sm flex flex-col gap-4">
                         <h2 className="text-[10px] font-label-caps text-text-muted uppercase tracking-widest border-b border-border-slate pb-2">Image Integrity</h2>
@@ -680,7 +711,7 @@ export default function DataCenter() {
                             <p className="text-xs text-text-muted leading-relaxed">
                                 Discards runtime memory resetting database constraints strictly to backup contents atomically. Snapshots rollback cache natively on fail.
                             </p>
-                            
+
                             {!zipPreview ? (
                                 <div className="mt-auto relative w-full h-12">
                                     <input
@@ -700,9 +731,9 @@ export default function DataCenter() {
                                     <div className="flex flex-col gap-1 border-b border-border-slate/50 pb-3">
                                         <h3 className="text-[10px] text-warning uppercase tracking-widest font-label-caps">Archive Validated</h3>
                                         <div className="grid grid-cols-2 gap-2 mt-2">
-                                           <span className="text-xs text-text-muted">Trades:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">{zipPreview.backup.tradeCount}</span>
-                                           <span className="text-xs text-text-muted">Images:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">{zipPreview.manifest.imageCount}</span>
-                                           <span className="text-xs text-text-muted">DB Schema:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">v{zipPreview.manifest.databaseSchemaVersion}</span>
+                                            <span className="text-xs text-text-muted">Trades:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">{zipPreview.backup.tradeCount}</span>
+                                            <span className="text-xs text-text-muted">Images:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">{zipPreview.manifest.imageCount}</span>
+                                            <span className="text-xs text-text-muted">DB Schema:</span><span className="text-xs font-data-mono-sm text-text-high-contrast text-right">v{zipPreview.manifest.databaseSchemaVersion}</span>
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
@@ -753,33 +784,68 @@ export default function DataCenter() {
                     <section className="bg-surface-panel border border-border-slate rounded-lg p-5 flex flex-col gap-4 shadow-sm hover:border-border-slate-hover transition-colors">
                         <h3 className="text-xs text-text-high-contrast font-label-caps uppercase tracking-wider">Raw JSON Schema</h3>
                         <p className="text-[10px] text-text-muted">Export textual data arrays exclusively without image bindings.</p>
-                        <button onClick={handleExport} disabled={isExporting} className="mt-auto py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">
-                            {isExporting ? "Compiling..." : "Export JSON"}
-                        </button>
+                        <div className="flex gap-4 mt-auto">
+                            <button onClick={handleExport} disabled={isExporting} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">
+                                {isExporting ? "Compiling..." : "Export JSON"}
+                            </button>
+                            <input type="file" accept=".json" onChange={processImportFile} ref={fileInputRef} hidden />
+                            <button onClick={() => fileInputRef.current?.click()} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">
+                                Import JSON
+                            </button>
+                        </div>
                     </section>
+
+                    {importAnalysis && (
+                        <section className="bg-surface-panel border border-warning/50 rounded-lg p-5 flex flex-col gap-4 md:col-span-2 shadow-sm animate-fade-in-up mt-6">
+                            <h3 className="text-xs text-warning font-label-caps uppercase tracking-wider">JSON Import Preview</h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-surface p-4 rounded text-xs text-text-muted">
+                                <div className="flex flex-col"><span className="text-[10px] uppercase">New</span> <strong className="text-positive text-lg">{importAnalysis.newTrades.length}</strong></div>
+                                <div className="flex flex-col"><span className="text-[10px] uppercase">Hard Dupes</span> <strong className="text-text-high-contrast text-lg">{importAnalysis.existingCount}</strong></div>
+                                <div className="flex flex-col"><span className="text-[10px] uppercase">Soft Dupes</span> <strong className="text-warning text-lg">{importAnalysis.possibleDuplicates.length}</strong></div>
+                                <div className="flex flex-col"><span className="text-[10px] uppercase">Invalid</span> <strong className="text-negative text-lg">{importAnalysis.invalidCount}</strong></div>
+                            </div>
+                            {importAnalysis.possibleDuplicates.length > 0 && (
+                                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto mt-2">
+                                    {importAnalysis.possibleDuplicates.map((dup, i) => (
+                                        <div key={i} className="flex items-center justify-between bg-surface border border-border-slate p-3 rounded text-xs">
+                                            <span>{dup.date} • {dup.pair} • {dup.direction}</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setImportAnalysis(prev => ({ ...prev, possibleDuplicates: prev.possibleDuplicates.filter((_, idx) => idx !== i) }))} className="px-3 py-1 bg-surface-hover border border-border-slate rounded text-[10px] uppercase tracking-widest text-text-high-contrast">Skip</button>
+                                                <button onClick={() => setImportAnalysis(prev => ({ ...prev, newTrades: [...prev.newTrades, dup], possibleDuplicates: prev.possibleDuplicates.filter((_, idx) => idx !== i) }))} className="px-3 py-1 bg-warning text-on-warning rounded text-[10px] uppercase tracking-widest">Import Anyway</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="flex gap-4 mt-2">
+                                <button onClick={() => { setImportAnalysis(null); }} className="flex-1 py-2 bg-surface-hover border border-border-slate rounded text-xs font-label-caps uppercase tracking-widest text-text-high-contrast">Cancel</button>
+                                <button onClick={handleExecuteImport} disabled={isImporting} className="flex-1 py-2 bg-primary hover:bg-primary/90 text-on-primary rounded text-xs font-label-caps uppercase tracking-widest disabled:opacity-50">{isImporting ? "Importing..." : "Execute Import"}</button>
+                            </div>
+                        </section>
+                    )}
                     <section className="bg-surface-panel border border-border-slate rounded-lg p-5 flex flex-col gap-4 shadow-sm hover:border-border-slate-hover transition-colors">
                         <h3 className="text-xs text-text-high-contrast font-label-caps uppercase tracking-wider">PDF Render Engine</h3>
                         <p className="text-[10px] text-text-muted">Generate flat binary print exports outlining trading mechanics organically.</p>
                         <div className="grid grid-cols-2 gap-2 mt-auto">
-                           <select value={pdfRange} onChange={e => setPdfRange(e.target.value)} className="bg-surface border border-border-slate text-[10px] p-2 rounded text-text-high-contrast outline-none focus:border-primary transition-colors">
-                               <option value="ALL">All Memory</option>
-                           </select>
-                           <select value={pdfImageSize} onChange={e => setPdfImageSize(e.target.value)} className="bg-surface border border-border-slate text-[10px] p-2 rounded text-text-high-contrast outline-none focus:border-primary transition-colors">
-                               <option value="MEDIUM">Med Bound</option>
-                               <option value="LARGE">Large Bound</option>
-                           </select>
+                            <select value={pdfRange} onChange={e => setPdfRange(e.target.value)} className="bg-surface border border-border-slate text-[10px] p-2 rounded text-text-high-contrast outline-none focus:border-primary transition-colors">
+                                <option value="ALL">All Memory</option>
+                            </select>
+                            <select value={pdfImageSize} onChange={e => setPdfImageSize(e.target.value)} className="bg-surface border border-border-slate text-[10px] p-2 rounded text-text-high-contrast outline-none focus:border-primary transition-colors">
+                                <option value="MEDIUM">Med Bound</option>
+                                <option value="LARGE">Large Bound</option>
+                            </select>
                         </div>
                         <button onClick={handlePdfExport} disabled={isGeneratingPdf} className="py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">
                             {isGeneratingPdf ? "Building PDF..." : (pdfProgress ? pdfProgress : "Export PDF")}
                         </button>
                     </section>
-                    
+
                     <section className="bg-surface-panel border border-border-slate rounded-lg p-5 flex flex-col gap-4 md:col-span-2 shadow-sm hover:border-border-slate-hover transition-colors">
                         <h3 className="text-xs text-text-high-contrast font-label-caps uppercase tracking-wider">Spreadsheet & Notion Sync</h3>
                         <p className="text-[10px] text-text-muted leading-relaxed max-w-3xl">Export CSV/XLSX logs tracking metrics cleanly mapped to bounds securely without APIs. Import capabilities dynamically map Notion exports indexing duplicates.</p>
                         <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                           <button onClick={handleCsvExport} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">Export CSV</button>
-                           <button onClick={handleExcelExport} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">Export EXCEL</button>
+                            <button onClick={handleCsvExport} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">Export CSV</button>
+                            <button onClick={handleExcelExport} className="flex-1 py-2 bg-surface shadow-[inset_0_1px_3px_rgba(0,0,0,0.2)] border border-border-slate text-xs font-label-caps uppercase tracking-widest rounded hover:bg-surface-hover transition-colors text-text-high-contrast">Export EXCEL</button>
                         </div>
                     </section>
                 </div>

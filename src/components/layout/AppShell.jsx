@@ -7,15 +7,14 @@ const navigation = [
   ["Discipline", "discipline", "policy"],
   ["Review", "review", "rate_review"],
   ["Data Center", "dataCenter", "storage"],
+  ["Settings", "settings", "settings"],
 ];
 
 function AppShell({
   children,
   page,
   onPageChange,
-  onNewTrade,
-  onExport,
-  onImportClick,
+  onNewTrade
 }) {
   // We can use random dummy values matching Stitch UI for presentation if not dynamic yet
   return (
@@ -78,22 +77,6 @@ function AppShell({
             </div>
             <div className="text-xs text-on-surface-variant mt-2 truncate flex items-center justify-between">
               <span>Account: DEMO</span>
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button
-                type="button"
-                onClick={onExport}
-                className="text-xs text-on-surface-variant hover:text-primary transition-colors uppercase font-label-caps"
-              >
-                Export
-              </button>
-              <button
-                type="button"
-                onClick={onImportClick}
-                className="text-xs text-on-surface-variant hover:text-primary transition-colors uppercase font-label-caps"
-              >
-                Import
-              </button>
             </div>
           </div>
         </div>

@@ -170,19 +170,6 @@ export function TradeProvider({ children }) {
     }
   };
 
-  const importBackup = async (importedTrades) => {
-    await saveTradesToDB(importedTrades);
-    const storedTrades = await getAllTrades();
-    setTrades(
-      storedTrades
-        .map((t) => ({
-          ...t,
-          ...classifySession(t.date),
-          pair: normalizeInstrument(t.pair),
-        }))
-        .sort((a, b) => new Date(b.date) - new Date(a.date)),
-    );
-  };
 
   // Helper hook exposed for consumers to resolve images async
   const resolveTradeImages = useCallback(async (tradeId) => {
@@ -204,7 +191,6 @@ export function TradeProvider({ children }) {
         updateTrade,
         deleteTrade,
         clearData,
-        importBackup,
         reloadTrades,
         resolveTradeImages
       }}

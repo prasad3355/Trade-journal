@@ -8,20 +8,20 @@ import Review from "./pages/Review";
 import Discipline from "./pages/Discipline";
 import Calendar from "./pages/Calendar";
 import DataCenter from "./pages/DataCenter";
+import Settings from "./pages/Settings";
 import TradeDetail from "./components/TradeDetail";
 import { useTrades } from "./context/TradeContext";
 import TradeEditor from "./components/trades/TradeEditor";
 import { useRef } from "react";
 
 function App() {
-  const { trades, isLoading, importBackup } = useTrades();
+  const { trades, isLoading } = useTrades();
   const [selectedTrade, setSelectedTrade] = useState(null);
   const [reviewTrades, setReviewTrades] = useState([]);
   const [page, setPage] = useState("dashboard");
   const [tradeFilters, setTradeFilters] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [tradeToEdit, setTradeToEdit] = useState(null);
-  const fileReaderRef = useRef(null);
 
   useEffect(() => {
     if (!isLoading) setReviewTrades(trades);
@@ -41,34 +41,6 @@ function App() {
     );
   }
 
-  const handleExport = () => {
-    const dataStr =
-      "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(trades));
-    const dlAnchorElem = document.createElement("a");
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "tradefolio_backup.json");
-    dlAnchorElem.click();
-  };
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        try {
-          const imported = JSON.parse(event.target.result);
-          if (Array.isArray(imported)) {
-            await importBackup(imported);
-            alert("Backup imported gracefully.");
-          }
-        } catch (err) {
-          alert("Invalid backup file.");
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
 
   return (
     <main className="w-full h-screen bg-surface-canvas text-text-high-contrast selection:bg-primary selection:text-background relative overflow-hidden">
@@ -79,16 +51,7 @@ function App() {
           setTradeToEdit(null);
           setIsEditorOpen(true);
         }}
-        onExport={handleExport}
-        onImportClick={() => fileReaderRef.current?.click()}
       >
-        <input
-          type="file"
-          accept=".json"
-          ref={fileReaderRef}
-          onChange={handleImport}
-          hidden
-        />
         {page === "trades" ? (
           <Trades
             trades={trades}
@@ -130,6 +93,8 @@ function App() {
           <Discipline trades={trades} onSelectTrade={openTrade} />
         ) : page === "calendar" ? (
           <Calendar trades={trades} onSelectTrade={openTrade} />
+        ) : page === "settings" ? (
+          <Settings />
         ) : (
           <Dashboard
             trades={trades}

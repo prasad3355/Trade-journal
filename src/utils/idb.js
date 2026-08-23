@@ -289,66 +289,175 @@ export async function getAllTradeImagesMetadata() {
 
 export async function createRollbackSnapshot() {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_TRADES, STORE_IMAGES, STORE_ROLLBACK, STORE_IMAGES_ROLLBACK], "readwrite");
-    const tradesStore = transaction.objectStore(STORE_TRADES);
-    const imagesStore = transaction.objectStore(STORE_IMAGES);
-    const rollbackTradesStore = transaction.objectStore(STORE_ROLLBACK);
-    const rollbackImagesStore = transaction.objectStore(STORE_IMAGES_ROLLBACK);
 
-    // Clear caches
-    rollbackTradesStore.clear();
-    rollbackImagesStore.clear();
+  // ---------------------------------------------------------------------------
+  // PHASE 1: Read trades + images simultaneously using a single readonly
+  // transaction. Both getAll() requests are issued before any onsuccess fires,
+  // so the transaction always has ≥1 pending request and cannot auto-commit
+  // between them. This mirrors the Phase 6.5.1 fix applied to restoreRollback.
+  // ---------------------------------------------------------------------------
+  const [tradesToSnapshot, imagesToSnapshot] = await new Promise((resolve, reject) => {
+    const readTx = db.transaction([STORE_TRADES, STORE_IMAGES], "readonly");
 
-    // Pipeline trades
-    const getTradesReq = tradesStore.getAll();
-    getTradesReq.onsuccess = () => {
-      getTradesReq.result.forEach(t => rollbackTradesStore.put(t));
+    const tradesReq = readTx.objectStore(STORE_TRADES).getAll();
+    const imagesReq = readTx.objectStore(STORE_IMAGES).getAll();
 
-      // Pipeline images
-      const getImagesReq = imagesStore.getAll();
-      getImagesReq.onsuccess = () => {
-        getImagesReq.result.forEach(img => rollbackImagesStore.put(img));
-      };
+    let tradesResult;
+    let imagesResult;
+    let settled = 0;
+
+    const onBothReady = () => {
+      settled++;
+      if (settled === 2) resolve([tradesResult, imagesResult]);
     };
 
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    tradesReq.onsuccess = () => { tradesResult = tradesReq.result; onBothReady(); };
+    tradesReq.onerror = () => reject(tradesReq.error);
+
+    imagesReq.onsuccess = () => { imagesResult = imagesReq.result; onBothReady(); };
+    imagesReq.onerror = () => reject(imagesReq.error);
+
+    readTx.onerror = () => reject(readTx.error);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Validate both datasets before touching the rollback stores.
+  // ---------------------------------------------------------------------------
+  if (!Array.isArray(tradesToSnapshot) || !Array.isArray(imagesToSnapshot)) {
+    throw new Error("createRollbackSnapshot: read phase returned invalid data.");
+  }
+
+  // Structural validation for images
+  for (const img of imagesToSnapshot) {
+    if (!img || typeof img.id !== "string" || !img.tradeId) {
+      throw new Error("createRollbackSnapshot: read phase returned structurally invalid images.");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // PHASE 2: Write rollback trades + rollback images.
+  // All operations are queued synchronously in a single readwrite transaction
+  // within the same event-loop tick — no async gap, no auto-commit risk.
+  // ---------------------------------------------------------------------------
+  return new Promise((resolve, reject) => {
+    const writeTx = db.transaction(
+      [STORE_ROLLBACK, STORE_IMAGES_ROLLBACK],
+      "readwrite"
+    );
+    const rollbackTradesStore = writeTx.objectStore(STORE_ROLLBACK);
+    const rollbackImagesStore = writeTx.objectStore(STORE_IMAGES_ROLLBACK);
+
+    // Clear stale snapshot data, then write fresh copies — all synchronous.
+    rollbackTradesStore.clear();
+    rollbackImagesStore.clear();
+    tradesToSnapshot.forEach(t => rollbackTradesStore.put(t));
+    imagesToSnapshot.forEach(img => rollbackImagesStore.put(img));
+
+    writeTx.oncomplete = () => {
+      // -------------------------------------------------------------------
+      // VERIFY COUNTS: confirm the rollback stores hold the same number of
+      // records that were read. A mismatch means a silent put() failure
+      // occurred — reject so the caller can handle it before any destructive
+      // operation starts.
+      // -------------------------------------------------------------------
+      const verifyTx = db.transaction([STORE_ROLLBACK, STORE_IMAGES_ROLLBACK], "readonly");
+      const vTradesReq = verifyTx.objectStore(STORE_ROLLBACK).count();
+      const vImagesReq = verifyTx.objectStore(STORE_IMAGES_ROLLBACK).count();
+
+      let vTrades;
+      let vImages;
+      let vSettled = 0;
+
+      const onVerifyReady = () => {
+        vSettled++;
+        if (vSettled === 2) {
+          if (vTrades !== tradesToSnapshot.length || vImages !== imagesToSnapshot.length) {
+            reject(new Error(
+              `Snapshot count mismatch — expected ${tradesToSnapshot.length} trades / ` +
+              `${imagesToSnapshot.length} images, got ${vTrades} / ${vImages}.`
+            ));
+          } else {
+            resolve();  // SNAPSHOT READY
+          }
+        }
+      };
+
+      vTradesReq.onsuccess = () => { vTrades = vTradesReq.result; onVerifyReady(); };
+      vTradesReq.onerror = () => reject(vTradesReq.error);
+
+      vImagesReq.onsuccess = () => { vImages = vImagesReq.result; onVerifyReady(); };
+      vImagesReq.onerror = () => reject(vImagesReq.error);
+
+      verifyTx.onerror = () => reject(verifyTx.error);
+    };
+
+    writeTx.onerror = () => reject(writeTx.error);
+    writeTx.onabort = () => reject(writeTx.error ?? new Error("Snapshot write transaction aborted."));
   });
 }
 
 export async function restoreRollbackSnapshot() {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_TRADES, STORE_IMAGES, STORE_ROLLBACK, STORE_IMAGES_ROLLBACK], "readwrite");
-    const tradesStore = transaction.objectStore(STORE_TRADES);
-    const imagesStore = transaction.objectStore(STORE_IMAGES);
-    const rollbackTradesStore = transaction.objectStore(STORE_ROLLBACK);
-    const rollbackImagesStore = transaction.objectStore(STORE_IMAGES_ROLLBACK);
 
-    const getTradesSnapshotReq = rollbackTradesStore.getAll();
-    getTradesSnapshotReq.onsuccess = () => {
-      const rollbackTrades = getTradesSnapshotReq.result;
+  // -----------------------------------------------------------------------
+  // PHASE 1: Read both snapshot stores using a dedicated readonly transaction.
+  // This separates the "read" concern from the "write" concern and avoids the
+  // auto-commit race: the readonly transaction stays alive across both getAll()
+  // calls, and only once BOTH results are in hand do we open the readwrite
+  // restore transaction.
+  // -----------------------------------------------------------------------
+  const [rollbackTrades, rollbackImages] = await new Promise((resolve, reject) => {
+    const readTx = db.transaction([STORE_ROLLBACK, STORE_IMAGES_ROLLBACK], "readonly");
+    const rollbackTradesStore = readTx.objectStore(STORE_ROLLBACK);
+    const rollbackImagesStore = readTx.objectStore(STORE_IMAGES_ROLLBACK);
 
-      const getImagesSnapshotReq = rollbackImagesStore.getAll();
-      getImagesSnapshotReq.onsuccess = () => {
-        const rollbackImages = getImagesSnapshotReq.result;
+    // Issue BOTH getAll() requests immediately — transaction has two pending
+    // requests from the start, so it cannot auto-commit between them.
+    const tradesReq = rollbackTradesStore.getAll();
+    const imagesReq = rollbackImagesStore.getAll();
 
-        // Completely erase current state if we have a valid snapshot branch
-        // (Technically rollback might be empty array if snapshot occurred on blank slate)
-        if (rollbackTrades !== undefined) {
-          tradesStore.clear();
-          rollbackTrades.forEach(t => tradesStore.put(t));
-        }
-        if (rollbackImages !== undefined) {
-          imagesStore.clear();
-          rollbackImages.forEach(img => imagesStore.put(img));
-        }
-      };
+    let tradesResult;
+    let imagesResult;
+    let settled = 0;
+
+    const onBothComplete = () => {
+      settled++;
+      if (settled === 2) resolve([tradesResult, imagesResult]);
     };
 
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    tradesReq.onsuccess = () => { tradesResult = tradesReq.result; onBothComplete(); };
+    tradesReq.onerror = () => reject(tradesReq.error);
+
+    imagesReq.onsuccess = () => { imagesResult = imagesReq.result; onBothComplete(); };
+    imagesReq.onerror = () => reject(imagesReq.error);
+
+    readTx.onerror = () => reject(readTx.error);
+  });
+
+  // -----------------------------------------------------------------------
+  // PHASE 2: Open a single readwrite transaction and queue ALL write operations
+  // synchronously — no async gap, no auto-commit risk. If any write fails the
+  // entire transaction aborts and onerror rejects.
+  // -----------------------------------------------------------------------
+  return new Promise((resolve, reject) => {
+    const writeTx = db.transaction([STORE_TRADES, STORE_IMAGES], "readwrite");
+    const tradesStore = writeTx.objectStore(STORE_TRADES);
+    const imagesStore = writeTx.objectStore(STORE_IMAGES);
+
+    // Queue all write operations synchronously in the same event-loop tick.
+    // The transaction cannot auto-commit while there are any pending IDB requests.
+    if (Array.isArray(rollbackTrades)) {
+      tradesStore.clear();
+      rollbackTrades.forEach(t => tradesStore.put(t));
+    }
+    if (Array.isArray(rollbackImages)) {
+      imagesStore.clear();
+      rollbackImages.forEach(img => imagesStore.put(img));
+    }
+
+    writeTx.oncomplete = () => resolve();
+    writeTx.onerror = () => reject(writeTx.error);
+    writeTx.onabort = () => reject(writeTx.error ?? new Error("Restore transaction aborted."));
   });
 }
 
