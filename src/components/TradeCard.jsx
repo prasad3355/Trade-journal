@@ -100,7 +100,7 @@ function TradeCard({ trade, onSelect, onEdit, onDuplicate, onDelete }) {
 
       {/* Image thumbnail (approx 16:9) */}
       <div
-        className="w-full aspect-[16/9] border-b border-border-slate relative bg-surface-canvas bg-cover bg-center shrink-0 cursor-pointer group"
+        className="w-full aspect-[16/9] border-b border-border-slate relative bg-cover bg-center shrink-0 cursor-pointer group"
         onClick={() => onSelect(trade)}
         style={{
           backgroundImage: `url('${displayImage}')`,
