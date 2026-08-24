@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { useTrades } from "../context/TradeContext";
 import {
   formatCurrency,
   formatDate,
@@ -24,7 +26,45 @@ function TradeCard({ trade, onSelect, onEdit, onDuplicate, onDelete }) {
   const isLoss = trade.pnl < 0;
   const pnlColor = isWin ? "text-positive" : isLoss ? "text-negative" : "text-text-muted";
 
-  const image = trade.images?.[0] || trade.image;
+  const { resolveTradeImages } = useTrades();
+  const [resolvedImage, setResolvedImage] = useState(null);
+
+  useEffect(() => {
+    let activeUrls = [];
+    let cancelled = false;
+
+    // Use default string paths (like seeded "/XAUUSD-Trade-5.png")
+    let defaultList = trade.images?.length ? trade.images : (trade.image ? [trade.image] : []);
+    let initialImage = defaultList.length > 0 ? defaultList[0] : null;
+
+    // Stale blob URLs (blob:http...) from memory don't survive refresh; reject them.
+    if (initialImage && initialImage.startsWith("blob:")) {
+      initialImage = null;
+    }
+
+    if (!cancelled) {
+      setResolvedImage(initialImage);
+    }
+
+    // Lazy load the real blob from IndexedDB for this trade
+    resolveTradeImages(trade.id).then(urls => {
+      if (cancelled) {
+        urls.forEach(url => URL.revokeObjectURL(url));
+        return;
+      }
+      if (urls && urls.length > 0) {
+        setResolvedImage(urls[0]);
+        activeUrls = urls;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      activeUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [trade.id, trade.image, trade.images, resolveTradeImages]);
+
+  const displayImage = resolvedImage || "https://via.placeholder.com/800x450/0c1324/dce1fb?text=No+Chart+Attached";
 
   return (
     <div className="bg-surface-panel border border-border-slate rounded-lg overflow-hidden flex flex-col h-full shadow-sm hover:border-text-muted transition-colors">
@@ -63,7 +103,7 @@ function TradeCard({ trade, onSelect, onEdit, onDuplicate, onDelete }) {
         className="w-full aspect-[16/9] border-b border-border-slate relative bg-surface-canvas bg-cover bg-center shrink-0 cursor-pointer group"
         onClick={() => onSelect(trade)}
         style={{
-          backgroundImage: `url('${image || "https://via.placeholder.com/800x450/0c1324/dce1fb?text=No+Chart+Attached"}')`,
+          backgroundImage: `url('${displayImage}')`,
         }}
       >
         <div className="absolute inset-0 bg-surface-panel/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
