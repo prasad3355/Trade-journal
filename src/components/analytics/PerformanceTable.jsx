@@ -6,69 +6,63 @@ import {
 
 function PerformanceTable({ title, rows, onSelect }) {
   return (
-    <section className="bg-surface-panel border border-border-slate flex flex-col rounded overflow-hidden">
-      <div className="border-b border-border-slate p-2 flex justify-between items-center bg-surface-container">
-        <h3 className="font-label-caps text-label-caps text-text-high-contrast uppercase border-l-2 border-primary pl-2">
+    <section className="flex flex-col rounded overflow-hidden">
+      <div className="border-b border-white/10 pb-2 mb-2 flex justify-between items-baseline">
+        <h3 className="text-[10px] font-label-caps uppercase tracking-widest text-white/40">
           {title}
         </h3>
-        <span className="font-label-caps text-label-caps text-text-muted">
-          {rows.length} records
+        <span className="text-[10px] font-label-caps uppercase tracking-widest text-white/30">
+          {rows.length} groups
         </span>
       </div>
 
       <div className="flex-1 overflow-x-auto overflow-y-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="sticky top-0 bg-surface-panel z-10 border-b border-border-slate font-label-caps text-label-caps text-text-muted">
+          <thead className="text-[9px] uppercase font-label-caps tracking-widest text-white/30">
             <tr>
-              <th className="p-2 font-normal whitespace-nowrap">GROUP</th>
-              <th className="p-2 font-normal text-right whitespace-nowrap">
-                TRADES
+              <th className="py-2 font-normal whitespace-nowrap">Group</th>
+              <th className="py-2 font-normal text-right whitespace-nowrap">
+                Vol
               </th>
-              <th className="p-2 font-normal text-right whitespace-nowrap">
-                WIN RATE
+              <th className="py-2 font-normal text-right whitespace-nowrap">
+                W%
               </th>
-              <th className="p-2 font-normal text-right whitespace-nowrap">
-                NET P&amp;L
-              </th>
-              <th className="p-2 font-normal text-right whitespace-nowrap">
-                AVG P&amp;L
+              <th className="py-2 font-normal text-right whitespace-nowrap">
+                Net P&amp;L
               </th>
             </tr>
           </thead>
-          <tbody className="font-data-sm text-data-sm">
+          <tbody className="font-data-mono text-sm">
             {rows.map((row) => (
               <tr
                 key={row.label}
-                className={`border-b border-border-slate/50 hover:bg-surface-container-high transition-colors ${onSelect ? "cursor-pointer" : ""}`}
+                className={`border-b border-white/5 hover:bg-white/5 transition-colors group ${onSelect ? "cursor-pointer" : ""}`}
                 onClick={() => onSelect?.(row.label)}
               >
                 <td
-                  className="p-2 font-medium text-text-high-contrast max-w-[120px] truncate"
+                  className="py-3 font-bold text-white group-hover:text-white max-w-[120px] truncate"
                   title={row.label}
                 >
                   {row.label}
                 </td>
-                <td className="p-2 text-right text-text-muted">
+                <td className="py-3 text-right text-white/50">
                   {row.trades ?? row.wins + row.losses + row.breakEven}
                 </td>
-                <td className="p-2 text-right text-text-muted">
+                <td className="py-3 text-right text-white/50">
                   {Math.round(row.winRate * 100)}%
                 </td>
                 <td
-                  className={`p-2 text-right ${row.netPnl >= 0 ? "text-positive" : "text-negative"}`}
+                  className={`py-3 text-right font-bold ${row.netPnl >= 0 ? "text-positive" : "text-negative"}`}
                 >
                   {formatSigned(formatCurrency(row.netPnl))}
-                </td>
-                <td className="p-2 text-right text-text-muted">
-                  {formatSigned(formatCurrency(row.averagePnl))}
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan="5"
-                  className="p-4 text-center text-text-muted italic"
+                  colSpan="4"
+                  className="py-6 text-center text-white/30 text-xs"
                 >
                   No data available
                 </td>

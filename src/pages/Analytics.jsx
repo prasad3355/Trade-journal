@@ -64,27 +64,27 @@ function Analytics({ trades, onSelectTrade, onFilterTrades }) {
   const startingValue = 0; // Cumulative P&L starts at 0
 
   return (
-    <div className="flex-1 overflow-x-hidden overflow-y-auto bg-surface w-full">
-      <div className="max-w-[1920px] mx-auto p-4 md:p-6 flex flex-col gap-4 animate-fade-in">
+    <div className="flex-1 w-full relative z-0 bg-[#0a0a0b] text-white overflow-y-auto">
+      <div className="max-w-[2000px] mx-auto p-8 space-y-12 pb-24">
 
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-slate pb-4 shrink-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-white/10 pb-8 animate-fade-in-up">
           <div>
-            <h2 className="font-headline-md text-3xl font-semibold text-text-high-contrast uppercase tracking-widest">
-              Performance Analytics
+            <h2 className="font-headline-md text-4xl md:text-5xl font-black tracking-tight mb-2">
+              Analytics.
             </h2>
-            <p className="font-data-mono-sm text-text-muted mt-1">
-              Historical performance, risk dynamics, and edge tracking
+            <p className="text-white/50 text-lg font-light tracking-wide">
+              Deep dive into system logic.
             </p>
           </div>
-          <div className="flex bg-surface-panel border border-border-slate rounded-sm overflow-hidden p-0.5">
+          <div className="flex bg-[#111] rounded-full p-1 border border-white/5">
             {['ALL', 'YTD', '90D', '30D', '1W'].map(filter => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-1.5 text-xs font-label-caps uppercase transition-colors rounded-sm ${activeFilter === filter
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-text-muted hover:text-text-high-contrast border border-transparent"
+                className={`px-5 py-2 text-xs font-label-caps uppercase rounded-full transition-all ${activeFilter === filter
+                  ? "bg-white text-black font-bold shadow-lg"
+                  : "text-white/50 hover:text-white"
                   }`}
               >
                 {filter}
@@ -93,128 +93,111 @@ function Analytics({ trades, onSelectTrade, onFilterTrades }) {
           </div>
         </div>
 
-        {/* PRIMARY WORKSPACE (Asymmetric Grid) */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-none">
-          {/* MAIN PANEL: Chart */}
-          <div className="lg:col-span-9 bg-surface-panel border border-border-slate flex flex-col relative rounded-sm shrink-0 min-h-[450px]">
-            <div className="border-b border-border-slate/50 px-5 py-4 flex flex-col lg:flex-row justify-between lg:items-center bg-surface-container rounded-t-sm gap-4">
-              <h3 className="font-label-caps text-text-high-contrast uppercase border-l-2 border-primary pl-2 tracking-widest text-[13px]">
-                Cumulative P&L / Equity
-              </h3>
+        {/* PRIMARY WORKSPACE */}
+        <section className="animate-fade-in-up">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
 
-              <div className="flex bg-surface rounded-sm p-0.5 text-[10px] border border-border-slate">
-                {['EQUITY', 'P&L', 'DRAWDOWN', 'R-MULTIPLE'].map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setChartMode(mode)}
-                    className={`px-3 py-1.5 uppercase rounded-sm font-bold tracking-widest transition-colors ${chartMode === mode ? 'bg-primary/20 text-primary border border-primary/30' : 'text-text-muted hover:text-text-high-contrast border border-transparent'}`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex-1 relative p-4 flex flex-col group min-h-[350px]">
-
-              {/* Chart Intelligence Header inside panel */}
-              <div className="flex justify-between items-start mb-2 px-2 shrink-0">
-                <div className="font-data-mono-md text-4xl font-bold text-text-high-contrast tracking-tight flex items-center gap-4">
-                  {chartMode === 'R-MULTIPLE' ? `${formatSigned(formatNumber(currentRr))}R` : formatSigned(formatCurrency(currentEquity))}
-                  <span className={`text-sm font-normal px-2 py-1 rounded bg-surface/50 border border-border-slate ${data.summary.netPnl >= 0 ? "text-positive" : "text-negative"}`}>
-                    {formatSigned(formatCurrency(data.summary.netPnl))} Net Change
-                  </span>
-                </div>
-                <div className="flex flex-col items-end gap-1 font-data-mono-sm text-xs">
-                  <div className="flex gap-4">
-                    <span className="text-text-muted">Start</span>
-                    <span className="text-text-high-contrast w-16 text-right">{formatSigned(formatCurrency(startingValue))}</span>
+            {/* LEFT: Stats */}
+            <div className="lg:col-span-4 space-y-12">
+              <div>
+                <h3 className="text-xs font-label-caps tracking-widest uppercase text-white/40 mb-6 border-b border-white/10 pb-3">
+                  Aggregated Edge
+                </h3>
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Executions</span>
+                    <span className="font-data-mono text-sm tracking-wide text-white">{data.summary.trades}</span>
                   </div>
-                  <div className="flex gap-4">
-                    <span className="text-text-muted">Peak</span>
-                    <span className="text-text-high-contrast w-16 text-right">{formatSigned(formatCurrency(peak))}</span>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Win Rate</span>
+                    <span className="font-data-mono text-sm tracking-wide text-primary">{Math.round(data.summary.winRate * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Cumulative RR</span>
+                    <span className="font-data-mono text-sm tracking-wide text-white">
+                      {data.summary.trades ? formatSigned(formatNumber(filteredTrades.reduce((sum, t) => sum + (Number(t.rr) || 0), 0))) : 0}R
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Chart container */}
-              <div className="flex-1 mt-4">
-                <EquityChart points={data.equity} mode={chartMode} onSelect={(trade) => onSelectTrade(trade, filteredTrades)} />
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT SIDEBAR: Chart Intelligence Stack */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <div className="bg-surface-panel border border-border-slate rounded-sm p-4 flex-1 flex flex-col justify-center shadow-sm">
-              <h3 className="font-label-caps text-[11px] font-bold text-text-muted uppercase mb-4 tracking-widest border-b border-border-slate/50 pb-2">
-                Execution Stats
-              </h3>
-              <div className="space-y-4 font-data-mono-sm text-xs font-bold">
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Total Trades</span>
-                  <span className="text-text-high-contrast">{data.summary.trades}</span>
-                </div>
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Winning Trades</span>
-                  <span className="text-positive">{filteredTrades.filter(t => t.pnl > 0).length}</span>
-                </div>
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Losing Trades</span>
-                  <span className="text-negative">{filteredTrades.filter(t => t.pnl < 0).length}</span>
-                </div>
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Win Rate</span>
-                  <span className="text-primary">{Math.round(data.summary.winRate * 100)}%</span>
-                </div>
-                <div className="flex justify-between items-end">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Average R</span>
-                  <span className="text-text-high-contrast">
-                    {data.summary.trades ? formatSigned(formatNumber(filteredTrades.reduce((sum, t) => sum + (Number(t.rr) || 0), 0) / data.summary.trades)) : 0}R
-                  </span>
+              <div>
+                <h3 className="text-xs font-label-caps tracking-widest uppercase text-white/40 mb-6 border-b border-white/10 pb-3">
+                  Risk Profile
+                </h3>
+                <div className="space-y-5">
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Max Drawdown</span>
+                    <span className="font-data-mono text-sm tracking-wide text-negative">{formatSigned(formatCurrency(maxDrawdown))}</span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Current DD</span>
+                    <span className="font-data-mono text-sm tracking-wide text-white">{formatSigned(formatCurrency(currentDrawdown))}</span>
+                  </div>
+                  <div className="flex justify-between items-center group">
+                    <span className="text-sm font-light text-white/70 group-hover:text-white transition-colors">Max Consecutive Loss</span>
+                    <span className="font-data-mono text-sm tracking-wide text-negative">{data.streaks.maxLoss}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface-panel border border-border-slate rounded-sm p-4 flex-1 flex flex-col justify-center shadow-sm">
-              <h3 className="font-label-caps text-[11px] font-bold text-text-muted uppercase mb-4 tracking-widest border-b border-border-slate/50 pb-2">
-                Risk & Drawdown
-              </h3>
-              <div className="space-y-4 font-data-mono-sm text-xs font-bold">
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Max Drawdown</span>
-                  <span className="text-negative text-sm">{formatSigned(formatCurrency(maxDrawdown))}</span>
+            {/* RIGHT: Main Chart */}
+            <div className="lg:col-span-8">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-baseline mb-6 border-b border-white/10 pb-3 gap-4">
+                <h3 className="text-xs font-label-caps tracking-widest uppercase text-white/40">
+                  Equity Curve
+                </h3>
+
+                <div className="flex gap-4">
+                  {['EQUITY', 'P&L', 'DRAWDOWN', 'R-MULTIPLE'].map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => setChartMode(mode)}
+                      className={`text-[10px] uppercase font-label-caps tracking-widest transition-colors ${chartMode === mode ? 'text-primary border-b border-primary pb-1' : 'text-white/30 hover:text-white'}`}
+                    >
+                      {mode}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex justify-between items-end border-b border-border-slate/50 pb-2">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Current DD</span>
-                  <span className="text-text-high-contrast">{formatSigned(formatCurrency(currentDrawdown))}</span>
+              </div>
+
+              <div className="relative min-h-[400px]">
+                <div className="flex justify-between items-start mb-6 shrink-0">
+                  <div className="font-data-mono text-4xl font-light tracking-tight flex items-center gap-4 text-white">
+                    {chartMode === 'R-MULTIPLE' ? `${formatSigned(formatNumber(currentRr))}R` : formatSigned(formatCurrency(currentEquity))}
+                    <span className={`text-sm font-normal px-2 py-1 rounded bg-[#111] border border-white/5 ${data.summary.netPnl >= 0 ? "text-positive" : "text-negative"}`}>
+                      {formatSigned(formatCurrency(data.summary.netPnl))} Net Change
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 font-data-mono text-xs opacity-50">
+                    <div className="flex gap-4">
+                      <span>Start</span>
+                      <span className="w-16 text-right">{formatSigned(formatCurrency(startingValue))}</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <span>Peak</span>
+                      <span className="w-16 text-right">{formatSigned(formatCurrency(peak))}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-end">
-                  <span className="text-text-muted font-normal tracking-widest uppercase font-label-caps text-[10px]">Longest Loss Streak</span>
-                  <span className="text-negative">{data.streaks.maxLoss}</span>
+
+                <div className="h-[350px] w-full mt-4">
+                  <EquityChart points={data.equity} mode={chartMode} onSelect={(trade) => onSelectTrade(trade, filteredTrades)} />
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface-panel border border-border-slate rounded-sm p-4 shadow-sm">
-              <h3 className="font-label-caps text-[10px] text-text-high-contrast uppercase mb-2 tracking-widest">
-                Performance State
-              </h3>
-              <div className={`text-[10px] font-data-mono-sm p-2 rounded border ${data.summary.netPnl >= 0 ? "bg-positive/10 border-positive/30 text-positive" : "bg-negative/10 border-negative/30 text-negative"}`}>
-                {data.summary.netPnl >= 0 ? "System is currently profitable and functioning near expected baseline." : "System is in a drawdown phase. Ensure risk thresholds are not being breached."}
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* BOTTOM TABLES: Performance Breakdowns */}
-        <section className="bg-surface border border-border-slate rounded-sm flex flex-col flex-1 shrink-0 overflow-hidden min-h-[400px]">
-          <div className="border-b border-border-slate p-4 bg-surface-panel flex items-center">
-            <h3 className="font-label-caps text-[13px] text-text-high-contrast uppercase border-l-2 border-primary pl-2 tracking-widest">
-              Distribution & Breakdowns
-            </h3>
-          </div>
-          <div className="flex-1 p-5 overflow-y-auto no-scrollbar grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 bg-surface-panel shadow-sm">
+        {/* BOTTOM: Breakdowns */}
+        <section className="animate-fade-in-up border-t border-white/10 pt-12" style={{ animationDelay: '150ms' }}>
+          <h3 className="text-xs font-label-caps tracking-widest uppercase text-white/40 mb-8 border-b border-white/10 pb-3 inline-block">
+            Distribution Matrices
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12 lg:gap-16">
             <PerformanceTable
               title="Setup Edge"
               rows={data.setups}
@@ -229,16 +212,6 @@ function Analytics({ trades, onSelectTrade, onFilterTrades }) {
               title="Directional Bias"
               rows={data.directions}
             />
-            <PerformanceTable
-              title="Rules Adherence"
-              rows={data.rules}
-              onSelect={(rulesFollowed) =>
-                onFilterTrades({
-                  rules: rulesFollowed.toLowerCase().startsWith("yes") ? "yes" : "no",
-                })
-              }
-            />
-            <PerformanceTable title="Risk Distribution" rows={data.money} />
           </div>
         </section>
       </div>

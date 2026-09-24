@@ -8,9 +8,8 @@ import {
 function EquityChart({ points, mode, onSelect }) {
   if (!points || points.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center text-text-muted">
-        <span className="material-symbols-outlined text-[32px] mb-2 opacity-50">show_chart</span>
-        <span className="font-label-caps text-xs tracking-widest uppercase">No Data Available</span>
+      <div className="w-full h-full flex flex-col items-center justify-center text-white/30">
+        <span className="text-xs uppercase font-label-caps tracking-widest">No Data Available</span>
       </div>
     );
   }
@@ -70,30 +69,28 @@ function EquityChart({ points, mode, onSelect }) {
         preserveAspectRatio="none"
         className="w-full h-full overflow-visible"
       >
-        {/* Drawdown area representation if we are NOT in drawdown mode 
-            actually let's just make the chart gradient fill */}
-
         <defs>
           <linearGradient id="primaryGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
           </linearGradient>
           <linearGradient id="negativeGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-negative)" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="var(--color-negative)" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="#e53e3e" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
         {/* Horizontal grid lines */}
-        <path d={`M${insetX} ${insetY} H${vbW - insetX}`} className="stroke-border-slate opacity-20" strokeWidth="1" />
-        <path d={`M${insetX} ${insetY + chartH / 2} H${vbW - insetX}`} className="stroke-border-slate opacity-20" strokeWidth="1" />
-        <path d={`M${insetX} ${insetY + chartH} H${vbW - insetX}`} className="stroke-border-slate opacity-20" strokeWidth="1" />
+        <path d={`M${insetX} ${insetY} H${vbW - insetX}`} stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" />
+        <path d={`M${insetX} ${insetY + chartH / 2} H${vbW - insetX}`} stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" />
+        <path d={`M${insetX} ${insetY + chartH} H${vbW - insetX}`} stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" />
 
         {/* Zero line */}
         {min < 0 && max > 0 && (
           <path
             d={`M${insetX} ${zeroY}H${vbW - insetX}`}
-            className="stroke-text-muted opacity-50"
+            stroke="#ffffff"
+            strokeOpacity="0.2"
             strokeWidth="1"
             strokeDasharray="4 4"
             fill="none"
@@ -111,10 +108,10 @@ function EquityChart({ points, mode, onSelect }) {
         {/* Line */}
         <polyline
           points={coords.map((p) => `${p.x},${p.y}`).join(" ")}
-          stroke={mode === 'DRAWDOWN' ? "var(--color-negative)" : "var(--color-primary)"}
-          strokeWidth="2"
+          stroke={mode === 'DRAWDOWN' ? "#ffffff" : "#ffffff"}
+          strokeWidth="1.5"
           fill="none"
-          className="opacity-90"
+          className="opacity-70"
         />
 
         {/* Points */}
@@ -126,8 +123,8 @@ function EquityChart({ points, mode, onSelect }) {
               key={point.trade.id}
               cx={point.x}
               cy={point.y}
-              r="4"
-              className={`cursor-pointer transition-all hover:r-[6] ${isDrawdownMode ? "fill-negative" : (isWin ? "fill-positive" : "fill-border-slate")}`}
+              r="3.5"
+              className={`cursor-pointer transition-all hover:r-[6] ${isDrawdownMode ? "fill-negative" : (isWin ? "fill-white" : "fill-white/30")}`}
               onClick={() => onSelect(point.trade)}
             >
               <title>

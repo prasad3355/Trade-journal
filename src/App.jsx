@@ -3,25 +3,15 @@ import AppShell from "./components/layout/AppShell";
 import Dashboard from "./pages/Dashboard";
 import Trades from "./pages/Trades";
 import Analytics from "./pages/Analytics";
-import Performance from "./pages/Performance";
-import Review from "./pages/Review";
-import Discipline from "./pages/Discipline";
-import Calendar from "./pages/Calendar";
-import DataCenter from "./pages/DataCenter";
-import Settings from "./pages/Settings";
 import TradeDetail from "./components/TradeDetail";
 import { useTrades } from "./context/TradeContext";
-import TradeEditor from "./components/trades/TradeEditor";
-import { useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 function App() {
   const { trades, isLoading } = useTrades();
   const [selectedTrade, setSelectedTrade] = useState(null);
   const [reviewTrades, setReviewTrades] = useState([]);
-  const [page, setPage] = useState("dashboard");
-  const [tradeFilters, setTradeFilters] = useState(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [tradeToEdit, setTradeToEdit] = useState(null);
+  const [page, setPage] = useState("trades"); // Default to gallery
 
   useEffect(() => {
     if (!isLoading) setReviewTrades(trades);
@@ -34,107 +24,74 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-surface-canvas text-text-muted font-label-caps uppercase tracking-widest gap-4">
-        <div className="w-8 h-8 rounded-full border-2 border-border-slate border-t-primary animate-spin"></div>
-        Loading journal...
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-[#0a0a0b] text-white/50 font-label-caps uppercase tracking-widest gap-4">
+        <div className="w-6 h-6 rounded-full border-2 border-white/10 border-t-white animate-spin"></div>
+        Loading Archive...
       </div>
     );
   }
 
+  const pageVariants = {
+    initial: { opacity: 0, filter: "blur(4px)", y: 10 },
+    animate: { opacity: 1, filter: "blur(0px)", y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+    exit: { opacity: 0, filter: "blur(4px)", y: -10, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }
+  };
 
   return (
-    <main className="w-full h-screen bg-surface-canvas text-text-high-contrast selection:bg-primary selection:text-background relative overflow-hidden">
+    <main className="w-full h-screen bg-[#0a0a0b] text-white selection:bg-white/20 selection:text-white relative overflow-hidden font-sans">
       <AppShell
         page={page}
         onPageChange={setPage}
-        onNewTrade={() => {
-          setTradeToEdit(null);
-          setIsEditorOpen(true);
-        }}
       >
-        {page === "trades" ? (
-          <Trades
-            trades={trades}
-            onSelectTrade={openTrade}
-            initialFilters={tradeFilters}
-            onEdit={(t) => {
-              setTradeToEdit(t);
-              setIsEditorOpen(true);
-            }}
-            onDuplicate={(t) => {
-              const cloned = { ...t, id: `trade-${Date.now()}`, date: new Date().toISOString().slice(0, 16) };
-              setTradeToEdit(cloned);
-              setIsEditorOpen(true);
-            }}
-          />
-        ) : page === "analytics" ? (
-          <Analytics
-            trades={trades}
-            onSelectTrade={openTrade}
-            onFilterTrades={(filters) => {
-              setTradeFilters(filters);
-              setPage("trades");
-            }}
-          />
-        ) : page === "review" ? (
-          <Review
-            trades={trades}
-            onSelectTrade={openTrade}
-            onEdit={(t) => {
-              setTradeToEdit(t);
-              setIsEditorOpen(true);
-            }}
-          />
-        ) : page === "dataCenter" ? (
-          <DataCenter trades={trades} />
-        ) : page === "performance" ? (
-          <Performance trades={trades} onSelectTrade={openTrade} />
-        ) : page === "discipline" ? (
-          <Discipline trades={trades} onSelectTrade={openTrade} />
-        ) : page === "calendar" ? (
-          <Calendar trades={trades} onSelectTrade={openTrade} />
-        ) : page === "settings" ? (
-          <Settings />
-        ) : (
-          <Dashboard
-            trades={trades}
-            onSelectTrade={openTrade}
-            onViewTrades={() => setPage("trades")}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={page}
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="w-full h-full"
+          >
+            {page === "trades" ? (
+              <Trades
+                trades={trades}
+                onSelectTrade={openTrade}
+              />
+            ) : page === "analytics" ? (
+              <Analytics
+                trades={trades}
+                onSelectTrade={openTrade}
+              />
+            ) : (
+              <Dashboard
+                trades={trades}
+                onSelectTrade={openTrade}
+                onViewTrades={() => setPage("trades")}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </AppShell>
-      {selectedTrade && (
-        <TradeDetail
-          trade={selectedTrade}
-          trades={reviewTrades}
-          onClose={() => setSelectedTrade(null)}
-          onSelectTrade={setSelectedTrade}
-          onEdit={() => {
-            setTradeToEdit(selectedTrade);
-            setSelectedTrade(null);
-            setIsEditorOpen(true);
-          }}
-          onDuplicate={() => {
-            const cloned = {
-              ...selectedTrade,
-              id: `trade-${Date.now()}`,
-              date: new Date().toISOString().slice(0, 16),
-            };
-            setTradeToEdit(cloned);
-            setSelectedTrade(null);
-            setIsEditorOpen(true);
-          }}
-        />
-      )}
-      {isEditorOpen && (
-        <TradeEditor
-          initialData={tradeToEdit}
-          onClose={() => {
-            setIsEditorOpen(false);
-            setTradeToEdit(null);
-          }}
-        />
-      )}
+
+      <AnimatePresence>
+        {selectedTrade && (
+          <motion.div
+            key="trade-detail"
+            initial={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[100]"
+          >
+            <TradeDetail
+              trade={selectedTrade}
+              trades={reviewTrades}
+              onClose={() => setSelectedTrade(null)}
+              onSelectTrade={setSelectedTrade}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
