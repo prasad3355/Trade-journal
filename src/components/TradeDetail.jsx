@@ -10,7 +10,8 @@ function TradeDetail({ trade, trades, onClose, onSelectTrade }) {
   const [zoom, setZoom] = useState(1);
   const [imageIndex, setImageIndex] = useState(0);
 
-  const images = trade.images?.length ? trade.images : (trade.image ? [trade.image] : []);
+  const rawList = trade.images?.length ? trade.images : (trade.image ? [trade.image] : []);
+  const images = rawList.map((_, i) => `/trades/trade-${trade.id.replace("trd-", "")}-${i + 1}.png`);
   const isMulti = images.length > 1;
 
   // Find index relative to chronologically sorted input `trades` array

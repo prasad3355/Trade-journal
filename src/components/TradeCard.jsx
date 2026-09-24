@@ -15,11 +15,17 @@ export function normalizePair(pair) {
   return pair.toUpperCase(); // Fallback
 }
 
+function getTradeImages(trade) {
+  if (!trade) return [];
+  const rawList = trade.images?.length ? trade.images : (trade.image ? [trade.image] : []);
+  return rawList.map((_, i) => `/trades/trade-${trade.id.replace("trd-", "")}-${i + 1}.png`);
+}
+
 function TradeCard({ trade, onSelect }) {
   const isWin = trade.pnl > 0;
   const pnlColor = isWin ? "text-[#00a572]" : trade.pnl < 0 ? "text-[#ff516a]" : "text-white/60";
 
-  const imageList = trade.images?.length ? trade.images : (trade.image ? [trade.image] : []);
+  const imageList = getTradeImages(trade);
   const hasImages = imageList.length > 0;
   const isMulti = imageList.length > 1;
   const [activeImageIndex, setActiveImageIndex] = useState(0);
